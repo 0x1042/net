@@ -1,0 +1,95 @@
+Checks: [
+            "*",
+            "bugprone-*",
+            "clang-diagnostic-*",
+            "modernize-*",
+            "performance-*",
+            "readability-*",
+            "cppcoreguidelines-*",
+
+            "-abseil-*",
+            "-altera-*",
+            "-android-*",
+            "-cert-dcl16-c",
+            "-cert-dcl37-c",
+            "-cert-dcl51-cpp",
+            "-cert-err58-cpp",
+            "-cert-msc32-c",
+            "-cert-msc51-cpp",
+            "-cert-oop54-cpp",
+            "-cert-oop57-cpp",
+
+            "-darwin-*",
+            "-fuchsia-*",
+
+            "-google-build-using-namespace",
+            "-google-readability-braces-around-statements",
+            "-google-readability-casting",
+            "-google-readability-function-size",
+            "-google-readability-namespace-comments",
+            "-google-readability-todo",
+            "-cppcoreguidelines-pro-bounds-pointer-arithmetic",
+            "-readability-identifier-length",
+            "-cppcoreguidelines-avoid-do-while",
+
+            "-hicpp-avoid-c-arrays",
+            "-hicpp-avoid-goto",
+            "-hicpp-braces-around-statements",
+            "-hicpp-explicit-conversions",
+            "-hicpp-function-size",
+            "-hicpp-member-init",
+            "-hicpp-move-const-arg",
+            "-hicpp-multiway-paths-covered",
+            "-hicpp-named-parameter",
+            "-hicpp-no-array-decay",
+            "-hicpp-no-assembler",
+            "-hicpp-no-malloc",
+            "-hicpp-signed-bitwise",
+            "-hicpp-special-member-functions",
+            "-hicpp-uppercase-literal-suffix",
+            "-hicpp-use-auto",
+            "-hicpp-use-emplace",
+            "-hicpp-vararg",
+            "-linuxkernel-*",
+            "-llvm-*",
+            "-llvmlibc-*",
+            "-openmp-*",
+            "-misc-const-correctness",
+            "-misc-include-cleaner", # useful but far too many occurrences
+            "-misc-no-recursion",
+            "-misc-non-private-member-variables-in-classes",
+            "-misc-confusable-identifiers", # useful but slooo
+            "-misc-use-anonymous-namespace",
+            "-portability-simd-intrinsics",
+            "-zircon-*",
+      ]
+
+WarningsAsErrors: "*"
+
+ExtraArgs:
+      - "-Wno-unknown-pragmas"
+      - "-Wno-unused-command-line-argument" # similar issue
+
+CheckOptions:
+      readability-identifier-naming.ClassCase: CamelCase
+      readability-identifier-naming.EnumCase: CamelCase
+      readability-identifier-naming.LocalVariableCase: lower_case
+      readability-identifier-naming.StaticConstantCase: aNy_CasE
+      readability-identifier-naming.MemberCase: lower_case
+      readability-identifier-naming.PrivateMemberPrefix: ""
+      readability-identifier-naming.ProtectedMemberPrefix: ""
+      readability-identifier-naming.PublicMemberCase: lower_case
+      readability-identifier-naming.MethodCase: camelBack
+      readability-identifier-naming.PrivateMethodPrefix: ""
+      readability-identifier-naming.ProtectedMethodPrefix: ""
+      readability-identifier-naming.ParameterPackCase: lower_case
+      readability-identifier-naming.StructCase: CamelCase
+      readability-identifier-naming.TemplateTemplateParameterCase: CamelCase
+      readability-identifier-naming.TemplateParameterCase: lower_case
+      readability-identifier-naming.TypeTemplateParameterCase: CamelCase
+      readability-identifier-naming.TypedefCase: CamelCase
+      readability-identifier-naming.UnionCase: CamelCase
+      modernize-loop-convert.UseCxx20ReverseRanges: false
+      performance-move-const-arg.CheckTriviallyCopyableMove: false
+      readability-identifier-naming.TypeTemplateParameterIgnoredRegexp: expr-type
+      cppcoreguidelines-avoid-do-while.IgnoreMacros: true

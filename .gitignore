@@ -1,0 +1,7 @@
+.cache
+.vscode
+.idea
+cpp/_build
+compile_commands.json
+rust/target
+rust/Cargo.lock

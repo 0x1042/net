@@ -1,0 +1,11 @@
+[package]
+edition.workspace = true
+name = "sserver"
+version = "0.1.0"
+
+[dependencies]
+anyhow.workspace = true
+proxy = { path = "../proxy", version = "*" }
+tokio = { workspace = true, features = ["full"] }
+tracing-subscriber = { workspace = true, features = ["env-filter"] }
+tracing.workspace = true

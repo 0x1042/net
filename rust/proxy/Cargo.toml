@@ -9,27 +9,3 @@ httparse.workspace = true
 tokio = { workspace = true, features = ["full"] }
 tracing-subscriber = { workspace = true, features = ["env-filter"] }
 tracing.workspace = true
-
-[target.'cfg(target_os="android")'.dependencies]
-jni = { version = "0.21", default-features = false }
-
-# [lib]
-# crate-type = ['cdylib']
-
-
-[profile.release]
-codegen-units = 1
-debug = false
-debug-assertions = false
-lto = 'thin'
-opt-level = 3
-overflow-checks = false
-panic = 'unwind'
-rpath = false
-
-# cargo build --profile release-lto
-[profile.release-lto]
-inherits = "release"
-lto = true
-panic = "abort"
-strip = "debuginfo"

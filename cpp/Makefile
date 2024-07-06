@@ -6,13 +6,13 @@ VCPKG_PATH=${VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake
 TARGET=server
 
 config:
-	cmake -B _build -G Ninja -S . -DCMAKE_TOOLCHAIN_FILE=${VCPKG_PATH}
+	cmake -B target -G Ninja -S . -DCMAKE_TOOLCHAIN_FILE=${VCPKG_PATH}
 
 build: config
-	cmake --build _build
+	cmake --build target
 
 clean:
-	rm -fr _build
+	rm -fr target
 
 run: build
-	./_build/${TARGET}
+	./target/${TARGET}

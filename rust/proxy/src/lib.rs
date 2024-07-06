@@ -3,40 +3,16 @@ use tracing::{error, info};
 pub mod http;
 pub mod socks;
 
-pub async fn new_instance(port: u16) {
-    let endpoint = format!("0.0.0.0:{}", port);
-
-    tokio::spawn(async move {
-        if let Err(err) = instance(&endpoint).await {
-            error!("start instance error. {err}");
-        }
-    });
-}
-
-pub async fn instance(addr: &str) -> anyhow::Result<()> {
-    let ln = tokio::net::TcpListener::bind(addr).await?;
-
-    info!("server start. auto://{}", addr);
-
+pub async fn listen(addr: &str) -> anyhow::Result<()> {
+    let mut endpoint = addr.to_owned();
+    let info: Vec<_> = addr.split(":").collect();
+    if info[0].is_empty() {
+        endpoint = format!("0.0.0.0:{}", info[1]);
+    }
+    let ln = tokio::net::TcpListener::bind(&endpoint).await?;
+    info!("server start. auto://{}", &endpoint);
     loop {
         let (incoming, peer) = ln.accept().await?;
-        info!("incoming request {:?}", peer);
-        tokio::spawn(async move {
-            if let Err(err) = proxy(incoming).await {
-                error!("proxy error. {err}");
-            }
-        });
-    }
-}
-
-pub async fn simple(port: u16) {
-    let addr = format!("0.0.0.0:{}", port);
-    let ln = tokio::net::TcpListener::bind(&addr).await.unwrap();
-
-    info!("server start. auto://{}", addr);
-
-    loop {
-        let (incoming, peer) = ln.accept().await.unwrap();
         info!("incoming request {:?}", peer);
         tokio::spawn(async move {
             if let Err(err) = proxy(incoming).await {

@@ -1,0 +1,94 @@
+service:
+  golangci-lint-version: 1.56.x
+
+run:
+  concurrency: 8
+  build-tags:
+    - integ
+    - integfuzz
+  skip-dirs:
+    - genfiles$
+    - vendor$
+    - bin$
+  skip-files:
+    - ".*\\.pb\\.go"
+    - ".*\\.gen\\.go"
+
+linters:
+  disable-all: true
+  enable:
+    - unused
+    - errcheck
+    - exportloopref
+    - gocritic
+    - gofumpt
+    - goimports
+    - revive
+    - gosimple
+    - govet
+    - ineffassign
+    - lll
+    - misspell
+    - staticcheck
+    - stylecheck
+    - bodyclose
+    - unconvert
+    - unparam
+    - gci
+    - goconst
+    - gosec
+    - asciicheck
+    - prealloc
+    - predeclared
+    - makezero
+  fast: false
+
+linters-settings:
+  errcheck:
+    check-type-assertions: false
+    check-blank: false
+  govet:
+    check-shadowing: false
+  maligned:
+    suggest-new: true
+  misspell:
+    locale: US
+    ignore-words:
+      - cancelled
+      - marshalled
+  lll:
+    line-length: 160
+    tab-width: 1
+  gocritic:
+    disabled-checks:
+      - exitAfterDefer
+  unparam:
+    check-exported: false
+  gci:
+    sections:
+      - standard
+      - default
+      - prefix(github.com/yint-tech/majora-go/)
+  gosec:
+    severity: "low"
+    confidence: "low"
+    excludes:
+      - G102
+      - G112
+      - G306
+      - G401
+      - G402
+      - G404
+      - G501
+
+issues:
+  exclude-rules:
+    - path: _test\.go$|^tests/|^samples/
+      linters:
+        - errcheck
+        - maligned
+    - linters:
+        - staticcheck
+      text: "SA1019: rand.Seed has been deprecated"
+  exclude-use-default: true
+  max-same-issues: 0

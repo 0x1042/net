@@ -1,7 +1,9 @@
 .cache
 .vscode
 .idea
-cpp/_build
+cpp/target
 compile_commands.json
 rust/target
 rust/Cargo.lock
+go/target
+gi/go.sum

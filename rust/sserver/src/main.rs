@@ -1,3 +1,24 @@
+use clap::Parser;
+
+#[derive(Parser)] // requires `derive` feature
+struct Opt {
+    /// server listen address
+    #[arg(short, long, default_value = "0.0.0.0:10010")]
+    addr: String,
+
+    /// enable fast open
+    #[arg(short, long, default_value_t = false)]
+    fastopen: bool,
+
+    /// enable tcp nodelay
+    #[arg(short, long, default_value_t = false)]
+    nodelay: bool,
+
+    /// enable reuse address
+    #[arg(short, long, default_value_t = false)]
+    reuseaddr: bool,
+}
+
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     tracing_subscriber::fmt()
@@ -5,7 +26,9 @@ async fn main() -> anyhow::Result<()> {
         .with_thread_ids(true)
         .init();
 
-    proxy::instance(format!("{}:{}", "0.0.0.0", 10086).as_str()).await?;
+    let opt = Opt::parse();
+
+    proxy::listen(&opt.addr).await?;
 
     Ok(())
 }

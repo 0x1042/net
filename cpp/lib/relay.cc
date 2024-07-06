@@ -5,7 +5,10 @@
 #include <cstdint>
 #include <vector>
 
+#include <netinet/tcp.h>
 #include <spdlog/spdlog.h>
+#include <sys/socket.h>
+#include <sys/types.h>
 
 #include "http.h"
 #include "socks.h"
@@ -44,13 +47,32 @@ auto relay(asio::ip::tcp::socket & from, asio::ip::tcp::socket & to, const std::
     co_await (relay(from, to) && relay(to, from));
 }
 
-auto listener(asio::io_context & io_context, unsigned short port) -> asio::awaitable<void> {
-    auto endpoint = asio::ip::tcp::endpoint(asio::ip::tcp::v4(), port);
+auto listener(asio::io_context & io_context, const Option & option) -> asio::awaitable<void> {
+    auto endpoint = asio::ip::tcp::endpoint(asio::ip::tcp::v4(), option.port);
     spdlog::info("server listen at {}:{}", endpoint.address().to_string(), endpoint.port());
 
-    asio::ip::tcp::acceptor acceptor(io_context, endpoint);
+    asio::ip::tcp::acceptor ln(io_context, endpoint);
+
+    if (option.reuseaddr) {
+        asio::ip::tcp::acceptor::reuse_address reuse_opt(true);
+        ln.set_option(reuse_opt);
+    }
+
     for (;;) {
-        asio::ip::tcp::socket socket = co_await acceptor.async_accept(asio::use_awaitable);
+        asio::ip::tcp::socket socket = co_await ln.async_accept(asio::use_awaitable);
+        int enable = 1;
+        if (option.fastopen) {
+            ::setsockopt(socket.native_handle(), IPPROTO_TCP, TCP_FASTOPEN, &enable, sizeof(enable));
+        }
+
+        if (option.nodelay) {
+            ::setsockopt(socket.native_handle(), IPPROTO_TCP, TCP_NODELAY, &enable, sizeof(enable));
+        }
+
+        if (option.reuseaddr) {
+            ::setsockopt(socket.native_handle(), SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(enable));
+            ::setsockopt(socket.native_handle(), SOL_SOCKET, SO_REUSEPORT, &enable, sizeof(enable));
+        }
 
         std::array<std::byte, 1> data{};
         socket.receive(asio::buffer(data), asio::socket_base::message_peek);

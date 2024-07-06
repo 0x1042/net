@@ -15,9 +15,12 @@
 void show_usage(const std::string & name) {
     std::cout << "Usage: " << name << " <option> [value]" << std::endl;
     std::cout << "Options:\n";
-    std::cout << "  -p, --port      listen port\n";
-    std::cout << "  -w, --worker    worker number\n";
-    std::cout << "  -h, --help      print help\n";
+    std::cout << "  -p, --port          listen port\n";
+    std::cout << "  -f, --fastopen      enable fastopen\n";
+    std::cout << "  -r, --reuseaddr     enable reuse address\n";
+    std::cout << "  -n, --nodelay       enable tcp nodelay\n";
+    std::cout << "  -w, --worker        worker number\n";
+    std::cout << "  -h, --help          print help\n";
 }
 
 constexpr uint16_t DEFAULT_PORT = 10080;
@@ -25,12 +28,13 @@ constexpr size_t WORKER_NUM = 4;
 
 auto main(int argc, char ** argv) -> int {
     size_t worker = WORKER_NUM;
-    uint16_t port = DEFAULT_PORT;
 
     if (argc < 2) {
         show_usage(argv[0]);
         return 0;
     }
+
+    Option option{.port = DEFAULT_PORT, .fastopen = false, .nodelay = false, .reuseaddr = false};
 
     for (int i = 1; i < argc; i++) {
         const std::string arg = argv[i];
@@ -43,7 +47,19 @@ auto main(int argc, char ** argv) -> int {
             continue;
         }
         if ((arg == "-p" || arg == "--port") && i + 1 < argc) {
-            port = std::stoi(argv[i + 1]);
+            option.port = std::stoi(argv[i + 1]);
+            continue;
+        }
+        if ((arg == "-f" || arg == "--fastopen")) {
+            option.fastopen = true;
+            continue;
+        }
+        if ((arg == "-r" || arg == "--reuseaddr")) {
+            option.reuseaddr = true;
+            continue;
+        }
+        if ((arg == "-n" || arg == "--nodelay")) {
+            option.nodelay = true;
             continue;
         }
     }
@@ -58,7 +74,7 @@ auto main(int argc, char ** argv) -> int {
         asio::io_context io_context;
 
         // Run listener coroutine
-        asio::co_spawn(io_context, listener(io_context, port), asio::detached);
+        asio::co_spawn(io_context, listener(io_context, option), asio::detached);
 
         std::vector<std::thread> threads;
         threads.resize(worker);

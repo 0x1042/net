@@ -46,7 +46,15 @@ make build
 ## run
 
 ```
+./target/release/sserver --help
+Usage: sserver [OPTIONS]
 
+Options:
+  -a, --addr <ADDR>  server listen address [default: 0.0.0.0:10010]
+  -f, --fastopen     enable fast open
+  -n, --nodelay      enable tcp nodelay
+  -r, --reuseaddr    enable reuse address
+  -h, --help         Print help
 ```
 
 # go 

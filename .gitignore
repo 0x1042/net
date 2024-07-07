@@ -6,4 +6,7 @@ compile_commands.json
 rust/target
 rust/Cargo.lock
 go/target
-gi/go.sum
+go/go.sum
+zig/.zig-cache
+zig/pkg
+zig/target

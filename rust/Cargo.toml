@@ -9,7 +9,7 @@ edition = "2021"
 
 [workspace.dependencies]
 anyhow = "1.0"
-clap = { version = "4.5.8", features = ["derive"] }
+clap = { version = "4.5", features = ["derive"] }
 httparse = "1.9"
 mimalloc = "0.1"
 mio = { version = "1.0", features = ["log", "net"] }
@@ -21,7 +21,6 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 codegen-units = 1
 debug = false
 debug-assertions = false
-# lto = 'thin'
 lto = true
 opt-level = 3
 overflow-checks = false

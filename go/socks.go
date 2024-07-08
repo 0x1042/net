@@ -8,6 +8,12 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+var (
+	SUC    = []byte{0x05, 0x00}
+	SusRep = []byte{0x05, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}
+	errRep = []byte{0x05, 0x04, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}
+)
+
 func serveSocks(stream *Stream) {
 	header := make([]byte, 2)
 	_ = readBe(stream, &header)
@@ -17,8 +23,7 @@ func serveSocks(stream *Stream) {
 	methods := make([]byte, int(nmeth))
 	_ = readBe(stream, &methods)
 
-	resp := []byte{0x05, 0x00}
-	_ = writeBe(stream, resp)
+	_ = writeBe(stream, SUC)
 
 	// read request
 
@@ -55,11 +60,9 @@ func serveSocks(stream *Stream) {
 	remote, err := net.Dial("tcp", targetAddr)
 	if err != nil {
 		log.Error().Err(err).Str("remote", targetAddr).Msg("connect error")
-		reply := []byte{0x05, 0x04, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}
-		_, _ = stream.Write(reply)
+		_, _ = stream.Write(errRep)
 		return
 	}
-	reply := []byte{0x05, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}
-	_, _ = stream.Write(reply)
+	_, _ = stream.Write(SusRep)
 	relay(stream, remote)
 }

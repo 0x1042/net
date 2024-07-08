@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstddef>
 #include <cstdint>
 #include <string>
 #include <vector>
@@ -19,6 +20,11 @@ struct Option {
     bool fastopen = false;
     bool nodelay = false;
     bool reuseaddr = false;
+    int32_t worker = 0;
+
+    Option(int argc, char ** argv);
+
+    static void showUsage(const std::string & name);
 };
 
 auto relay(asio::ip::tcp::socket & from, asio::ip::tcp::socket & to, const std::string & tag = "console")

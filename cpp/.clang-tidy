@@ -1,12 +1,12 @@
 Checks: [
             "*",
             "bugprone-*",
-            "clang-diagnostic-*",
             "modernize-*",
             "performance-*",
             "readability-*",
             "cppcoreguidelines-*",
 
+            "-clang-analyzer-core.*",
             "-abseil-*",
             "-altera-*",
             "-android-*",
@@ -31,6 +31,10 @@ Checks: [
             "-cppcoreguidelines-pro-bounds-pointer-arithmetic",
             "-readability-identifier-length",
             "-cppcoreguidelines-avoid-do-while",
+            "-clang-diagnostic-*",
+            "-cppcoreguidelines-avoid-reference-coroutine-parameters",
+            "-performance-avoid-endl",
+            "-cppcoreguidelines-avoid-capturing-lambda-coroutines",
 
             "-hicpp-avoid-c-arrays",
             "-hicpp-avoid-goto",

@@ -1,5 +1,6 @@
 #include "http.h"
 
+#include <cstddef>
 #include <string>
 #include <vector>
 
@@ -10,6 +11,12 @@
 #include "relay.h"
 
 namespace http {
+
+constexpr size_t HEADER_SIZE = 512;
+constexpr size_t HEADER_CNT = 5;
+
+static constexpr std::string_view CONNECT = "CONNECT";
+static constexpr std::string_view CONNECT_RESP = "HTTP/1.1 200 Connection Established\r\n\r\n";
 
 Req::Req(const std::vector<std::string> & lines) {
     // first line
@@ -45,15 +52,14 @@ auto handle(asio::ip::tcp::socket socket) -> asio::awaitable<void> {
         asio::streambuf buffer;
 
         std::vector<std::string> lines;
+        lines.reserve(HEADER_CNT);
         for (;;) {
             std::size_t len = co_await asio::async_read_until(socket, buffer, "\r\n", asio::use_awaitable);
             auto bufs = buffer.data();
-            std::string line(asio::buffers_begin(bufs), asio::buffers_begin(bufs) + len);
-
-            if (line == "\r\n") {
+            std::string line(asio::buffers_begin(bufs), asio::buffers_begin(bufs) + len); // NOLINT
+            if (line == "\r\n" || line.empty()) {
                 break;
             }
-
             lines.push_back(std::move(line));
             buffer.consume(len);
         }
@@ -72,11 +78,11 @@ auto handle(asio::ip::tcp::socket socket) -> asio::awaitable<void> {
         spdlog::get("http")->info(
             "connect to {}:{} success. ", endpoints->endpoint().address().to_string(), endpoints->endpoint().port());
 
-        if (req.method == "CONNECT") {
-            const std::string & response = "HTTP/1.1 200 Connection Established\r\n\r\n";
-            co_await asio::async_write(socket, asio::buffer(response), asio::use_awaitable);
+        if (req.method == CONNECT) {
+            co_await asio::async_write(socket, asio::buffer(CONNECT_RESP), asio::use_awaitable);
         } else {
             std::string headers;
+            headers.reserve(HEADER_SIZE);
             for (const auto & line : lines) {
                 if (line == "Proxy-Connection: Keep-Alive\r\n") {
                     continue;

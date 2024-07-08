@@ -1,10 +1,21 @@
 package main
 
 import (
+	"bytes"
 	"net"
 	"strings"
 
 	"github.com/rs/zerolog/log"
+)
+
+var SUCCESS = []byte("HTTP/1.1 200 Connection Established\r\n\r\n")
+
+const (
+	CONNECT  = "CONNECT"
+	LF       = "\r\n"
+	PORT     = "80"
+	HEADLEN  = 5
+	HEADSIZE = 512
 )
 
 type Req struct {
@@ -15,6 +26,7 @@ type Req struct {
 
 func newReq(line []string) *Req {
 	req := new(Req)
+	req.Port = PORT
 	// first
 	{
 		// CONNECT www.google.com:443 HTTP/1.1\r\n
@@ -32,15 +44,13 @@ func newReq(line []string) *Req {
 		req.Host = strings.TrimSpace(tmps[1])
 		if len(tmps) == 3 {
 			req.Port = strings.TrimSpace(tmps[2])
-		} else {
-			req.Port = "80"
 		}
 	}
 	return req
 }
 
 func serveHTTP(stream *Stream) {
-	headers := make([]string, 0, 5)
+	headers := make([]string, 0, HEADLEN)
 	for {
 		line, err := stream.Line()
 		if err != nil {
@@ -48,7 +58,7 @@ func serveHTTP(stream *Stream) {
 			return
 		}
 
-		if line == "\r\n" || len(line) == 0 {
+		if line == LF || len(line) == 0 {
 			break
 		}
 		headers = append(headers, line)
@@ -63,18 +73,20 @@ func serveHTTP(stream *Stream) {
 		return
 	}
 
-	if req.Method == "CONNECT" {
-		_, _ = stream.Write([]byte("HTTP/1.1 200 Connection Established\r\n\r\n"))
+	if req.Method == CONNECT {
+		_, _ = stream.Write(SUCCESS)
 	} else {
-		var buf string
+		buf := bytes.Buffer{}
+		buf.Grow(HEADSIZE)
 		for _, line := range headers {
-			if strings.HasPrefix(line, "Proxy-") {
+			if strings.HasPrefix(line, "Proxy") {
 				continue
 			}
-			buf = buf + line + "\r\n"
+			buf.WriteString(line)
+			buf.WriteString(LF)
 		}
-		buf += "\r\n"
-		_, _ = remote.Write([]byte(buf))
+		buf.WriteString(LF)
+		_, _ = remote.Write(buf.Bytes())
 	}
 	relay(stream, remote)
 }

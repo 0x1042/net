@@ -3,6 +3,8 @@
 #include <cctype>
 #include <cstddef>
 #include <cstdint>
+#include <cstdlib>
+#include <iostream>
 #include <vector>
 
 #include <netinet/tcp.h>
@@ -15,11 +17,60 @@
 
 using namespace asio::experimental::awaitable_operators;
 
+constexpr size_t WORKER_NUM = 4;
+constexpr uint16_t DEFAULT_PORT = 10080;
 constexpr size_t bufsize = 16384;
 constexpr uint8_t ver = 0x05;
 
+Option::Option(int argc, char ** argv) : port(DEFAULT_PORT), worker(WORKER_NUM) {
+    if (argc < 2) {
+        Option::showUsage(argv[0]);
+        exit(0); // NOLINT
+    }
+    for (int i = 1; i < argc; i++) {
+        const std::string arg = argv[i];
+        if (arg == "-h" || arg == "--help") {
+            showUsage(argv[0]);
+            exit(0); // NOLINT
+        }
+        if ((arg == "-w" || arg == "--worker") && i + 1 < argc) {
+            worker = std::stoi(argv[i + 1]);
+            continue;
+        }
+        if ((arg == "-p" || arg == "--port") && i + 1 < argc) {
+            port = std::stoi(argv[i + 1]);
+            continue;
+        }
+        if ((arg == "-f" || arg == "--fastopen")) {
+            fastopen = true;
+            continue;
+        }
+        if ((arg == "-r" || arg == "--reuseaddr")) {
+            reuseaddr = true;
+            continue;
+        }
+        if ((arg == "-n" || arg == "--nodelay")) {
+            nodelay = true;
+            continue;
+        }
+    }
+}
+
+void Option::showUsage(const std::string & name) {
+    std::cout << "Usage: " << name << " <option> [value]" << std::endl;
+    std::cout << "Options:\n";
+    std::cout << "  -p, --port          listen port\n";
+    std::cout << "  -f, --fastopen      enable fastopen\n";
+    std::cout << "  -r, --reuseaddr     enable reuse address\n";
+    std::cout << "  -n, --nodelay       enable tcp nodelay\n";
+    std::cout << "  -w, --worker        worker number\n";
+    std::cout << "  -h, --help          print help\n";
+}
+
 auto relay(asio::ip::tcp::socket & from, asio::ip::tcp::socket & to, const std::string & tag) -> asio::awaitable<void> {
-    auto relay = [tag](asio::ip::tcp::socket & from, asio::ip::tcp::socket & to) -> asio::awaitable<void> {
+    std::string logger = tag;
+    auto relay = [logger = std::move(logger)](
+                     asio::ip::tcp::socket & from, asio::ip::tcp::socket & to) -> asio::awaitable<void> {
         const auto & from_addr = from.remote_endpoint();
         const auto & to_addr = to.remote_endpoint();
         size_t cnt = 0;
@@ -35,7 +86,7 @@ auto relay(asio::ip::tcp::socket & from, asio::ip::tcp::socket & to, const std::
             to.close();
         }
 
-        spdlog::get(tag)->info(
+        spdlog::get(logger)->info(
             "{}:{} -> {}:{} transfer {} bytes success. ",
             from_addr.address().to_string(),
             from_addr.port(),
@@ -76,8 +127,6 @@ auto listener(asio::io_context & io_context, const Option & option) -> asio::awa
 
         std::array<std::byte, 1> data{};
         socket.receive(asio::buffer(data), asio::socket_base::message_peek);
-        const auto & endpoint = socket.remote_endpoint();
-        spdlog::info("incoming request. {}:{}", endpoint.address().to_string(), endpoint.port());
 
         if (std::to_integer<uint8_t>(data.at(0)) == ver) {
             asio::co_spawn(io_context, socks::handle(std::move(socket)), asio::detached);

@@ -18,10 +18,6 @@ func newStream(c net.Conn) *Stream {
 	return &Stream{bufio.NewReader(c), c}
 }
 
-// func newStreamSize(c net.Conn, n int) *Stream {
-// 	return &Stream{bufio.NewReaderSize(c, n), c}
-// }
-
 func (b *Stream) Peek(n int) ([]byte, error) {
 	return b.r.Peek(n)
 }

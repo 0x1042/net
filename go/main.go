@@ -2,8 +2,10 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"net"
 	"os"
+	"strings"
 	"syscall"
 	"time"
 
@@ -47,15 +49,15 @@ func listen(option Option) error {
 	log.Info().Str("addr", option.addr).Msg("server start")
 
 	for {
-		incoming, err := ln.Accept()
+		conn, err := ln.Accept()
 		if err != nil {
 			log.Error().Err(err).Msg("accept error")
 			break
 		}
-		stream := newStream(incoming)
+		stream := newStream(conn)
 
 		peek, _ := stream.Peek(1)
-		log.Info().Uint8("type", peek[0]).Str("from", incoming.LocalAddr().String()).Msg("incomeing request")
+		log.Trace().Uint8("type", peek[0]).Str("from", conn.LocalAddr().String()).Msg("incomeing request")
 		if peek[0] == 0x05 {
 			go serveSocks(stream)
 		} else {
@@ -70,11 +72,13 @@ func main() {
 		Out:        os.Stderr,
 		NoColor:    false,
 		TimeFormat: time.TimeOnly,
+		FormatLevel: func(level any) string {
+			return strings.ToUpper(fmt.Sprintf("|%-6s|", level))
+		},
 	})
 
 	cmd := &cli.Command{
-		Name:  "proxy",
-		Usage: "proxy",
+		Name: "proxy",
 
 		Flags: []cli.Flag{
 			&cli.StringFlag{
@@ -83,12 +87,14 @@ func main() {
 				Aliases: []string{"a"},
 				Usage:   "listen address",
 			},
+
 			&cli.BoolFlag{
 				Name:    "fastopen",
 				Value:   false,
 				Aliases: []string{"f"},
 				Usage:   "enable fast open",
 			},
+
 			&cli.BoolFlag{
 				Name:    "nodelay",
 				Value:   false,
@@ -113,7 +119,7 @@ func main() {
 			return listen(option)
 		},
 	}
-	if err := cmd.Run(context.Background(), os.Args); err != nil {
+	if err := cmd.Run(context.TODO(), os.Args); err != nil {
 		log.Fatal().Err(err)
 	}
 }

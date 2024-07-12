@@ -85,8 +85,7 @@ auto handle(asio::ip::tcp::socket socket) -> asio::awaitable<void> {
         }
 
         // Read address and port
-
-        spdlog::get("socks")->info("connect to {}:{} success. ", endpoint.address().to_string(), endpoint.port());
+        // spdlog::get("socks")->info("connect to {}:{} success. ", endpoint.address().to_string(), endpoint.port());
 
         asio::ip::tcp::socket remote(socket.get_executor());
 

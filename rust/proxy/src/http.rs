@@ -3,6 +3,10 @@ use tokio::io::{AsyncBufReadExt, AsyncWriteExt};
 use tokio::time::Instant;
 use tracing::info;
 
+const CONNECT: &str = "CONNECT";
+const LF: &str = "\r\n";
+const SUC: &str = "HTTP/1.1 200 Connection Established\r\n\r\n";
+
 pub async fn handle(incoming: tokio::net::TcpStream) -> anyhow::Result<()> {
     let start = Instant::now();
     let from = incoming.peer_addr()?;
@@ -12,7 +16,7 @@ pub async fn handle(incoming: tokio::net::TcpStream) -> anyhow::Result<()> {
     loop {
         let mut buf = String::new();
         stream.read_line(&mut buf).await?;
-        if buf.eq("\r\n") {
+        if buf.eq(LF) || buf.is_empty() {
             break;
         }
         lines.push(buf);
@@ -41,22 +45,19 @@ pub async fn handle(incoming: tokio::net::TcpStream) -> anyhow::Result<()> {
 
     info!("connect to {} succsss. ", &endpoint);
 
-    if req.method.unwrap() == "CONNECT" {
-        let resp = format!("HTTP/1.1 200 Connection Established\r\n\r\n");
-        stream.write(resp.as_bytes()).await?;
+    if req.method.unwrap() == CONNECT {
+        stream.write(SUC.as_bytes()).await?;
     } else {
-        let tmpline = format!("{} {} HTTP/1.1\r\n", req.method.unwrap(), req.path.unwrap());
-        remote.write(tmpline.as_bytes()).await?;
-
-        for ele in req.headers.iter() {
-            if !ele.name.eq("Proxy-Connection") {
-                let name = ele.name.to_owned();
-                let val = String::from_utf8(ele.value.to_vec()).unwrap();
-                let hl = format!("{}: {}\r\n", name, val);
-                remote.write(hl.as_bytes()).await?;
+        let mut reqlines = String::new();
+        reqlines.reserve(256);
+        for line in lines.iter() {
+            if line.starts_with("Proxy-Connection") {
+                continue;
             }
+            reqlines.push_str(line);
         }
-        remote.write("\r\n".as_bytes()).await?;
+        reqlines.push_str(LF);
+        remote.write(reqlines.as_bytes()).await?;
     }
 
     let (rl, wl) = tokio::io::copy_bidirectional(&mut stream, &mut remote).await?;

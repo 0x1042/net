@@ -1,4 +1,5 @@
 #include <cstddef>
+#include <cstdint>
 #include <string>
 #include <thread>
 #include <vector>
@@ -18,26 +19,24 @@ auto main(int argc, char ** argv) -> int {
     spdlog::set_default_logger(console);
     spdlog::set_pattern("%^[%H:%M:%S %e] %l [%n] thread-%t %v %$");
 
-    try {
-        asio::io_context io_context;
+    asio::io_context io_context;
 
-        // Run listener coroutine
-        asio::co_spawn(io_context, listener(io_context, option), asio::detached);
+    // Run listener coroutine
+    asio::co_spawn(io_context, listener(io_context, option), asio::detached);
 
-        std::vector<std::thread> threads;
-        threads.resize(option.worker);
-        for (int i = 0; i < option.worker; ++i) {
-            threads.emplace_back([&io_context]() { io_context.run(); });
-        }
+    std::vector<std::thread> threads;
+    uint32_t worker = option.worker == 0 ? std::thread::hardware_concurrency() : option.worker;
 
-        io_context.run();
+    threads.resize(worker);
+    for (size_t i = 0; i < worker; ++i) {
+        threads.emplace_back([&io_context]() { io_context.run(); });
+    }
 
-        // Join all threads
-        for (auto & worker : threads) {
-            worker.join();
-        }
-    } catch (const std::exception & ex) {
-        spdlog::error("run exception :{}", ex.what());
+    io_context.run();
+
+    // Join all threads
+    for (auto & worker : threads) {
+        worker.join();
     }
     return 0;
 }

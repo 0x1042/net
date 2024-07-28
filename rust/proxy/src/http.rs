@@ -46,7 +46,7 @@ pub async fn handle(incoming: tokio::net::TcpStream) -> anyhow::Result<()> {
     info!("connect to {} succsss. ", &endpoint);
 
     if req.method.unwrap() == CONNECT {
-        stream.write(SUC.as_bytes()).await?;
+        let _ = stream.write(SUC.as_bytes()).await?;
     } else {
         let mut reqlines = String::new();
         reqlines.reserve(256);
@@ -57,7 +57,7 @@ pub async fn handle(incoming: tokio::net::TcpStream) -> anyhow::Result<()> {
             reqlines.push_str(line);
         }
         reqlines.push_str(LF);
-        remote.write(reqlines.as_bytes()).await?;
+        let _ = remote.write(reqlines.as_bytes()).await?;
     }
 
     let (rl, wl) = tokio::io::copy_bidirectional(&mut stream, &mut remote).await?;

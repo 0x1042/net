@@ -3,6 +3,8 @@ use tracing::{error, info};
 pub mod http;
 pub mod socks;
 
+const VER: u8 = 0x05;
+
 pub async fn listen(addr: &str) -> anyhow::Result<()> {
     let mut endpoint = addr.to_owned();
     let info: Vec<_> = addr.split(":").collect();
@@ -27,8 +29,8 @@ async fn proxy(incoming: tokio::net::TcpStream) -> anyhow::Result<()> {
     let mut ver = vec![0; 1];
     let _ = incoming.peek(&mut ver).await?;
 
-    if ver[0] == 0x05 {
+    if ver[0] == VER {
         return socks::handle(incoming).await;
     }
-    return http::handle(incoming).await;
+    http::handle(incoming).await
 }

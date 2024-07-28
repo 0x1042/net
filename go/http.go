@@ -35,9 +35,7 @@ func newReq(line []string) *Req {
 		req.Method = tmps[0]
 	}
 
-	// second
 	{
-
 		// Host: www.google.com:443
 		// Host: www.google.com
 		tmps := strings.Split(line[1], ":")

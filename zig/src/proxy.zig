@@ -93,7 +93,9 @@ pub fn run() !void {
     const address = try std.net.Address.parseIp(config.host, config.port);
     var listener = try address.listen(.{
         .reuse_address = true,
+        .reuse_port = true,
         .kernel_backlog = 1024,
+        .force_nonblocking = true,
     });
 
     defer listener.deinit();

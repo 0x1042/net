@@ -6,3 +6,6 @@ debug:
 
 clean:
 	cargo clean
+
+lint:
+	cargo clippy --all-targets --all-features -- -D warnings

@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <vector>
 
+#include <asio/ip/address_v4.hpp>
 #include <spdlog/spdlog.h>
 
 #include "relay.h"
@@ -19,7 +20,7 @@ constexpr size_t IPV4_LEN = 4;
 constexpr size_t IPV6_LEN = 16;
 constexpr size_t PORT_LEN = 2;
 
-auto handle(asio::ip::tcp::socket socket) -> asio::awaitable<void> {
+auto handle(TcpStream socket) -> asio::awaitable<void> {
     try {
         // Perform SOCKS5 handshake
         std::array<uint8_t, 4> handshake_request{};
@@ -40,7 +41,7 @@ auto handle(asio::ip::tcp::socket socket) -> asio::awaitable<void> {
         }
 
         uint8_t adty = request[3];
-        asio::ip::tcp::endpoint endpoint;
+        EndPoint endpoint;
         if (adty == 0x01) {
             std::array<uint8_t, IPV4_LEN> address{};
             co_await asio::async_read(socket, asio::buffer(address), asio::use_awaitable);
@@ -87,7 +88,7 @@ auto handle(asio::ip::tcp::socket socket) -> asio::awaitable<void> {
         // Read address and port
         // spdlog::get("socks")->info("connect to {}:{} success. ", endpoint.address().to_string(), endpoint.port());
 
-        asio::ip::tcp::socket remote(socket.get_executor());
+        TcpStream remote(socket.get_executor());
 
         // Connect to the remote server
         co_await remote.async_connect(endpoint, asio::use_awaitable);

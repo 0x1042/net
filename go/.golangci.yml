@@ -1,94 +1,113 @@
-service:
-  golangci-lint-version: 1.56.x
-
 run:
-  concurrency: 8
-  build-tags:
-    - integ
-    - integfuzz
-  skip-dirs:
-    - genfiles$
-    - vendor$
-    - bin$
-  skip-files:
-    - ".*\\.pb\\.go"
-    - ".*\\.gen\\.go"
-
+  timeout: 5m
 linters:
   disable-all: true
+  # Enable specific linter
+  # https://golangci-lint.run/usage/linters/#enabled-by-default
   enable:
-    - unused
-    - errcheck
-    - exportloopref
-    - gocritic
-    - gofumpt
-    - goimports
-    - revive
-    - gosimple
-    - govet
-    - ineffassign
-    - lll
-    - misspell
-    - staticcheck
-    - stylecheck
-    - bodyclose
-    - unconvert
-    - unparam
-    - gci
-    - goconst
-    - gosec
+    - asasalint
     - asciicheck
+    - bidichk
+    - bodyclose
+    - canonicalheader
+    - containedctx
+    - copyloopvar
+    - cyclop
+    - decorder
+    - dogsled
+    - dupl
+    - dupword
+    - durationcheck
+    - err113
+    - errcheck
+    - errchkjson
+    - errname
+    - errorlint
+    - exhaustive
+    - exportloopref
+    - fatcontext
+    - forbidigo
+    - forcetypeassert
+    - funlen
+    - gci
+    - ginkgolinter
+    - gocheckcompilerdirectives
+    - gochecknoinits
+    - gochecksumtype
+    - gocognit
+    - goconst
+    - gocritic
+    - gocyclo
+    - godot
+    - godox
+    - gofmt
+    - gofumpt
+    - goheader
+    - goimports
+    - gomoddirectives
+    - gomodguard
+    - goprintffuncname
+    - gosec
+    - gosimple
+    - gosmopolitan
+    - govet
+    - grouper
+    - importas
+    - inamedparam
+    - ineffassign
+    - interfacebloat
+    - intrange
+    - ireturn
+    - lll
+    - loggercheck
+    - maintidx
+    - makezero
+    - mirror
+    - misspell
+    - musttag
+    - nakedret
+    - nestif
+    - nilerr
+    - nilnil
+    - noctx
+    - nolintlint
+    - nosprintfhostport
+    - paralleltest
+    - perfsprint
     - prealloc
     - predeclared
-    - makezero
-  fast: false
-
-linters-settings:
-  errcheck:
-    check-type-assertions: false
-    check-blank: false
-  govet:
-    check-shadowing: false
-  maligned:
-    suggest-new: true
-  misspell:
-    locale: US
-    ignore-words:
-      - cancelled
-      - marshalled
-  lll:
-    line-length: 160
-    tab-width: 1
-  gocritic:
-    disabled-checks:
-      - exitAfterDefer
-  unparam:
-    check-exported: false
-  gci:
-    sections:
-      - standard
-      - default
-      - prefix(github.com/yint-tech/majora-go/)
-  gosec:
-    severity: "low"
-    confidence: "low"
-    excludes:
-      - G102
-      - G112
-      - G306
-      - G401
-      - G402
-      - G404
-      - G501
-
-issues:
-  exclude-rules:
-    - path: _test\.go$|^tests/|^samples/
-      linters:
-        - errcheck
-        - maligned
+    - promlinter
+    - protogetter
+    - reassign
+    - revive
+    - rowserrcheck
+    - sloglint
+    - spancheck
+    - sqlclosecheck
+    - staticcheck
+    - stylecheck
+    - tagalign
+    - tagliatelle
+    - tenv
+    - testableexamples
+    - testifylint
+    - testpackage
+    - thelper
+    - tparallel
+    - typecheck
+    - unconvert
+    - unparam
+    - unused
+    - usestdlibvars
+    - wastedassign
+    - whitespace
+    - zerologlint
+severity:
+  default-severity: error
+  rules:
     - linters:
-        - staticcheck
-      text: "SA1019: rand.Seed has been deprecated"
-  exclude-use-default: true
-  max-same-issues: 0
+        - gofmt
+        - goimports
+        - intrange
+        - usestdlibvars
+      severity: info

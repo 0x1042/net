@@ -16,19 +16,21 @@
 #include <asio.hpp>
 
 struct Option {
-    uint16_t port = 0;
+    uint16_t port = 10080; // NOLINT
     bool fastopen = false;
     bool nodelay = false;
     bool reuseaddr = false;
-    int32_t worker = 0;
+    uint32_t worker = 4; // NOLINT
 
     Option(int argc, char ** argv);
 
     static void showUsage(const std::string & name);
 };
 
-auto relay(asio::ip::tcp::socket & from, asio::ip::tcp::socket & to, const std::string & tag = "console")
-    -> asio::awaitable<void>;
+using TcpStream = asio::ip::tcp::socket;
+using EndPoint = asio::ip::tcp::endpoint;
+
+auto relay(TcpStream & from, TcpStream & to, const std::string & tag = "console") -> asio::awaitable<void>;
 
 auto listener(asio::io_context & io_context, const Option & option) -> asio::awaitable<void>;
 

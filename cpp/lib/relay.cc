@@ -17,12 +17,10 @@
 
 using namespace asio::experimental::awaitable_operators;
 
-constexpr size_t WORKER_NUM = 4;
-constexpr uint16_t DEFAULT_PORT = 10080;
 constexpr size_t bufsize = 16384;
 constexpr uint8_t ver = 0x05;
 
-Option::Option(int argc, char ** argv) : port(DEFAULT_PORT), worker(WORKER_NUM) {
+Option::Option(int argc, char ** argv) {
     if (argc < 2) {
         Option::showUsage(argv[0]);
         exit(0); // NOLINT
@@ -57,7 +55,7 @@ Option::Option(int argc, char ** argv) : port(DEFAULT_PORT), worker(WORKER_NUM) 
 }
 
 void Option::showUsage(const std::string & name) {
-    std::cout << "Usage: " << name << " <option> [value]" << std::endl;
+    std::cout << "Usage: " << name << " <option> [value]\n";
     std::cout << "Options:\n";
     std::cout << "  -p, --port          listen port\n";
     std::cout << "  -f, --fastopen      enable fastopen\n";
@@ -67,19 +65,18 @@ void Option::showUsage(const std::string & name) {
     std::cout << "  -h, --help          print help\n";
 }
 
-auto relay(asio::ip::tcp::socket & from, asio::ip::tcp::socket & to, const std::string & tag) -> asio::awaitable<void> {
+auto relay(TcpStream & from, TcpStream & to, const std::string & tag) -> asio::awaitable<void> {
     std::string logger = tag;
-    auto relay = [logger = std::move(logger)](
-                     asio::ip::tcp::socket & from, asio::ip::tcp::socket & to) -> asio::awaitable<void> {
+    auto relay = [logger = std::move(logger)](TcpStream & from, TcpStream & to) -> asio::awaitable<void> {
         const auto & from_addr = from.remote_endpoint();
         const auto & to_addr = to.remote_endpoint();
         size_t cnt = 0;
         try {
             std::array<std::byte, bufsize> data{};
             for (;;) {
-                std::size_t n = co_await from.async_read_some(asio::buffer(data), asio::use_awaitable);
-                co_await asio::async_write(to, asio::buffer(data, n), asio::use_awaitable);
-                cnt += n;
+                std::size_t len = co_await from.async_read_some(asio::buffer(data), asio::use_awaitable);
+                co_await asio::async_write(to, asio::buffer(data, len), asio::use_awaitable);
+                cnt += len;
             }
         } catch (...) {
             from.close();
@@ -99,7 +96,7 @@ auto relay(asio::ip::tcp::socket & from, asio::ip::tcp::socket & to, const std::
 }
 
 auto listener(asio::io_context & io_context, const Option & option) -> asio::awaitable<void> {
-    auto endpoint = asio::ip::tcp::endpoint(asio::ip::tcp::v4(), option.port);
+    auto endpoint = EndPoint(asio::ip::tcp::v4(), option.port);
     spdlog::info("server listen at {}:{}", endpoint.address().to_string(), endpoint.port());
 
     asio::ip::tcp::acceptor ln(io_context, endpoint);
@@ -110,7 +107,7 @@ auto listener(asio::io_context & io_context, const Option & option) -> asio::awa
     }
 
     for (;;) {
-        asio::ip::tcp::socket socket = co_await ln.async_accept(asio::use_awaitable);
+        TcpStream socket = co_await ln.async_accept(asio::use_awaitable);
         int enable = 1;
         if (option.fastopen) {
             ::setsockopt(socket.native_handle(), IPPROTO_TCP, TCP_FASTOPEN, &enable, sizeof(enable));

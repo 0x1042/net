@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"net"
+
+	// "net"
 	"os"
 	"strings"
 	"syscall"
@@ -120,6 +122,6 @@ func main() {
 		},
 	}
 	if err := cmd.Run(context.TODO(), os.Args); err != nil {
-		log.Fatal().Err(err)
+		log.Fatal().Err(err).Send()
 	}
 }

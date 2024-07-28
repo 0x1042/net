@@ -1,12 +1,11 @@
 #pragma once
 
-#include <asio/experimental/as_tuple.hpp>
-#include <asio/experimental/awaitable_operators.hpp>
-
 #include <asio.hpp>
+
+#include "relay.h"
 
 namespace socks {
 
-auto handle(asio::ip::tcp::socket socket) -> asio::awaitable<void>;
+auto handle(TcpStream socket) -> asio::awaitable<void>;
 
-}
+} // namespace socks

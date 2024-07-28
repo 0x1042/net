@@ -13,9 +13,16 @@ build: config
 
 clean:
 	rm -fr ${OUTPUT}
+	rm -fr bazel-*
 
 run: build
 	./${OUTPUT}/${TARGET}
 
 lint:
-	clang-tidy --config-file=.clang-tidy --format-style=file --header-filter=. -p ${OUTPUT} .
+	clang-tidy --format-style=file --header-filter=. -p ${OUTPUT} .
+
+lib:
+	bazel build //lib:proxy
+
+server:
+	bazel build //:sserver

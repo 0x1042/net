@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"encoding/binary"
+	"errors"
 	"io"
 	"net"
 
@@ -71,10 +72,14 @@ func relay(from, to net.Conn) {
 	}(to, from)
 
 	for resp := range channel {
-		if resp.err != nil && resp.err != io.EOF {
-			log.Error().Err(resp.err).Str("from", resp.from.String()).Str("to", resp.to.String()).Msg("relay error")
+		fromAddr := resp.from.String()
+		toAddr := resp.to.String()
+
+		if resp.err != nil && errors.Is(resp.err, io.EOF) {
+			log.Error().Err(resp.err).Str("from", fromAddr).Str("to", toAddr).Msg("relay error")
 		} else {
-			log.Info().Str("from", resp.from.String()).Str("to", resp.to.String()).Int64("transfer", resp.len).Msg("relay success")
+			log.Info().Str("from", fromAddr).
+				Str("to", toAddr).Int64("transfer", resp.len).Msg("relay success")
 		}
 	}
 }

@@ -47,7 +47,7 @@ Req::Req(const std::vector<std::string> & lines) {
 
 // todo http GET http://www.xxx.com/ HTTP/1.1
 // https CONNECT www.xxx.com:443 HTTP/1.1
-auto handle(asio::ip::tcp::socket socket) -> asio::awaitable<void> {
+auto handle(TcpStream socket) -> asio::awaitable<void> {
     try {
         asio::streambuf buffer;
 
@@ -69,7 +69,7 @@ auto handle(asio::ip::tcp::socket socket) -> asio::awaitable<void> {
         asio::ip::tcp::resolver::results_type endpoints
             = co_await resolver.async_resolve(req.domain, req.port, asio::use_awaitable);
 
-        asio::ip::tcp::socket remote(socket.get_executor());
+        TcpStream remote(socket.get_executor());
 
         co_await asio::async_connect(remote, endpoints, asio::use_awaitable);
         asio::ip::tcp::no_delay option(true);

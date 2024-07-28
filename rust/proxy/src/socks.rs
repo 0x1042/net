@@ -105,8 +105,8 @@ pub async fn handle(mut incoming: tokio::net::TcpStream) -> anyhow::Result<()> {
             // }
 
             if *method == 0x02 {
-                let mut buffer = vec![0x05, 0x02];
-                incoming.write(&mut buffer).await?;
+                let buffer = vec![0x05, 0x02];
+                let _ = incoming.write(&buffer).await?;
                 let ver = incoming.read_u8().await?;
 
                 debug!("ver is {}", ver);
@@ -128,8 +128,8 @@ pub async fn handle(mut incoming: tokio::net::TcpStream) -> anyhow::Result<()> {
                     String::from_utf8(namebuf).unwrap(),
                     String::from_utf8(pbuf).unwrap()
                 );
-                let mut authreply = vec![0x01, 0x00];
-                incoming.write(&mut authreply).await?;
+                let authreply = vec![0x01, 0x00];
+                let _ = incoming.write(&authreply).await?;
             }
         }
     }
@@ -158,8 +158,8 @@ pub async fn handle(mut incoming: tokio::net::TcpStream) -> anyhow::Result<()> {
         }
     };
 
-    let mut reply = vec![0x05, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00];
-    incoming.write(&mut reply).await?;
+    let reply = vec![0x05, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00];
+    let _ = incoming.write(&reply).await?;
 
     let from = incoming.peer_addr()?;
     // let tunnel = incoming.local_addr()?;

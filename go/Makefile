@@ -10,6 +10,7 @@ fmt:
 	gofumpt -l -w .
 
 tidy:
+	go get -u -v ./...
 	go mod tidy
 
 lint:

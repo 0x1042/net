@@ -1,2 +1,2 @@
 build:
-	zig build --release=fast -Doptimize=ReleaseFast --prefix target
+	zig build --release=safe -Doptimize=ReleaseSafe --prefix target

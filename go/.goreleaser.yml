@@ -1,0 +1,80 @@
+before:
+  hooks:
+    - go mod tidy
+    - go generate ./...
+    - go vet ./...
+
+builds:
+  - binary: sserver
+    main: .
+    ldflags:
+      - -s -w
+    flags:
+      - -trimpath
+    tags:
+      - netgo
+      - urfave_cli_no_docs
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - windows
+      - darwin
+      - freebsd
+      - dragonfly
+      - netbsd
+      - openbsd
+      - solaris
+
+    goarch:
+      - "386"
+      - amd64
+      - arm
+      - arm64
+      - riscv64
+      - mips
+      - mipsle
+      - mips64
+      - mips64le
+
+    goarm:
+      - "7"
+
+    goamd64:
+      - v2
+
+    gomips:
+      - hardfloat
+      - softfloat
+
+    ignore:
+      - goos: darwin
+        goarch: 386 riscv64
+      - goarm: mips64
+      - gomips: hardfloat
+      - goos: windows
+        goarch: riscv64 mips mipsle mips64le mips64
+
+archives:
+  - format: tar.gz
+    # this name template makes the OS and Arch compatible with the results of uname.
+    name_template: >-
+      sserver_
+      {{- title .Os }}_
+      {{- if eq .Arch "amd64" }}x86_64
+      {{- else if eq .Arch "386" }}i386
+      {{- else }}{{ .Arch }}{{ end }}
+      {{- if .Arm }}v{{ .Arm }}{{ end }}
+    # use zip for windows archives
+    format_overrides:
+      - goos: windows
+        format: zip
+
+checksum:
+  name_template: "checksums.txt"
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"

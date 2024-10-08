@@ -1,8 +1,0 @@
-module(
-    name = "server",
-    version = "1.0",
-)
-
-bazel_dep(name = "asio", version = "1.28.2")
-bazel_dep(name = "spdlog", version = "1.14.1", repo_name = "spdlog")
-bazel_dep(name = "abseil-cpp", version = "20240116.2")

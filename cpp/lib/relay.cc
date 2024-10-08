@@ -83,8 +83,9 @@ auto relay(TcpStream & from, TcpStream & to, const std::string & tag) -> asio::a
             to.close();
         }
 
-        spdlog::get(logger)->info(
-            "{}:{} -> {}:{} transfer {} bytes success. ",
+        spdlog::info(
+            "[{}] {}:{} -> {}:{} transfer {} bytes success. ",
+            logger,
             from_addr.address().to_string(),
             from_addr.port(),
             to_addr.address().to_string(),

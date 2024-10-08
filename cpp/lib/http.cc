@@ -75,7 +75,7 @@ auto handle(TcpStream socket) -> asio::awaitable<void> {
         asio::ip::tcp::no_delay option(true);
         remote.set_option(option);
 
-        spdlog::get("http")->info(
+        spdlog::info(
             "connect to {}:{} success. ", endpoints->endpoint().address().to_string(), endpoints->endpoint().port());
 
         if (req.method == CONNECT) {
@@ -97,7 +97,7 @@ auto handle(TcpStream socket) -> asio::awaitable<void> {
         co_await relay(socket, remote, "http");
 
     } catch (const std::exception & ex) {
-        spdlog::get("http")->error("run exception :{}", ex.what());
+        spdlog::error("run exception :{}", ex.what());
     }
 }
 

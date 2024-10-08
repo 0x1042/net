@@ -4,17 +4,13 @@ import (
 	"context"
 	"fmt"
 	"net"
-
-	// "net"
 	"os"
 	"strings"
-	"syscall"
 	"time"
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v3"
-	"golang.org/x/sys/unix"
 )
 
 type Option struct {
@@ -27,22 +23,7 @@ type Option struct {
 func listen(option Option) error {
 	var lc net.ListenConfig
 	lc.SetMultipathTCP(true)
-	lc.Control = func(_, _ string, c syscall.RawConn) error {
-		var err error
-		_ = c.Control(func(fd uintptr) {
-			if option.nodelay {
-				err = unix.SetsockoptInt(int(fd), unix.IPPROTO_TCP, unix.TCP_NODELAY, 1)
-			}
-			if option.fastOpen {
-				err = unix.SetsockoptInt(int(fd), unix.IPPROTO_TCP, unix.TCP_FASTOPEN, 1)
-			}
-			if option.reuseAddr {
-				err = unix.SetsockoptInt(int(fd), unix.SOL_SOCKET, unix.SO_REUSEADDR, 1)
-				err = unix.SetsockoptInt(int(fd), unix.SOL_SOCKET, unix.SO_REUSEPORT, 1)
-			}
-		})
-		return err
-	}
+	lc.Control = Control(option)
 	ln, err := lc.Listen(context.Background(), "tcp", option.addr)
 	if err != nil {
 		return err
@@ -80,8 +61,8 @@ func main() {
 	})
 
 	cmd := &cli.Command{
-		Name: "proxy",
-
+		Name:  "proxy",
+		Usage: "socks5 && http proxy util",
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:    "addr",
@@ -92,21 +73,21 @@ func main() {
 
 			&cli.BoolFlag{
 				Name:    "fastopen",
-				Value:   false,
+				Value:   true,
 				Aliases: []string{"f"},
 				Usage:   "enable fast open",
 			},
 
 			&cli.BoolFlag{
 				Name:    "nodelay",
-				Value:   false,
+				Value:   true,
 				Aliases: []string{"n"},
 				Usage:   "enable tcp nodely",
 			},
 
 			&cli.BoolFlag{
 				Name:    "reuseaddr",
-				Value:   false,
+				Value:   true,
 				Aliases: []string{"r"},
 				Usage:   "enable reuse addr",
 			},

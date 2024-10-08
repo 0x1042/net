@@ -63,11 +63,20 @@ func relay(from, to net.Conn) {
 
 	go func(dst, src net.Conn) {
 		size, err := io.Copy(dst, src)
+		log.Trace().Str("src_remote", src.RemoteAddr().String()).
+			Str("src_local", dst.LocalAddr().String()).
+			Str("to_remote", to.RemoteAddr().String()).
+			Str("to_local", to.LocalAddr().String()).Msg("from->to")
 		channel <- Resp{len: size, err: err, from: src.RemoteAddr(), to: dst.RemoteAddr()}
 	}(from, to)
 
 	go func(dst, src net.Conn) {
 		size, err := io.Copy(dst, src)
+		log.Trace().Str("src_remote", src.RemoteAddr().String()).
+			Str("src_local", dst.LocalAddr().String()).
+			Str("to_remote", to.RemoteAddr().String()).
+			Str("to_local", to.LocalAddr().String()).Msg("to->from")
+
 		channel <- Resp{len: size, err: err, from: src.RemoteAddr(), to: dst.RemoteAddr()}
 	}(to, from)
 

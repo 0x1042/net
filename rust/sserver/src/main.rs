@@ -7,15 +7,15 @@ struct Opt {
     addr: String,
 
     /// enable fast open
-    #[arg(short, long, default_value_t = false)]
+    #[arg(short, long, default_value_t = true)]
     fastopen: bool,
 
     /// enable tcp nodelay
-    #[arg(short, long, default_value_t = false)]
+    #[arg(short, long, default_value_t = true)]
     nodelay: bool,
 
     /// enable reuse address
-    #[arg(short, long, default_value_t = false)]
+    #[arg(short, long, default_value_t = true)]
     reuseaddr: bool,
 }
 

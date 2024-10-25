@@ -64,5 +64,5 @@ func serveSocks(stream *Stream) {
 		return
 	}
 	_, _ = stream.Write(SusRep)
-	relay(stream, remote)
+	relay("socks", stream, remote)
 }

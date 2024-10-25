@@ -53,7 +53,7 @@ type Resp struct {
 	to   net.Addr
 }
 
-func relay(from, to net.Conn) {
+func relay(tag string, from, to net.Conn) {
 	defer func(from, to net.Conn) {
 		_ = from.Close()
 		_ = to.Close()
@@ -63,20 +63,11 @@ func relay(from, to net.Conn) {
 
 	go func(dst, src net.Conn) {
 		size, err := io.Copy(dst, src)
-		log.Trace().Str("src_remote", src.RemoteAddr().String()).
-			Str("src_local", dst.LocalAddr().String()).
-			Str("to_remote", to.RemoteAddr().String()).
-			Str("to_local", to.LocalAddr().String()).Msg("from->to")
 		channel <- Resp{len: size, err: err, from: src.RemoteAddr(), to: dst.RemoteAddr()}
 	}(from, to)
 
 	go func(dst, src net.Conn) {
 		size, err := io.Copy(dst, src)
-		log.Trace().Str("src_remote", src.RemoteAddr().String()).
-			Str("src_local", dst.LocalAddr().String()).
-			Str("to_remote", to.RemoteAddr().String()).
-			Str("to_local", to.LocalAddr().String()).Msg("to->from")
-
 		channel <- Resp{len: size, err: err, from: src.RemoteAddr(), to: dst.RemoteAddr()}
 	}(to, from)
 
@@ -85,9 +76,9 @@ func relay(from, to net.Conn) {
 		toAddr := resp.to.String()
 
 		if resp.err != nil && errors.Is(resp.err, io.EOF) {
-			log.Error().Err(resp.err).Str("from", fromAddr).Str("to", toAddr).Msg("relay error")
+			log.Error().Err(resp.err).Str("tag", tag).Str("from", fromAddr).Str("to", toAddr).Msg("relay error")
 		} else {
-			log.Info().Str("from", fromAddr).
+			log.Info().Str("tag", tag).Str("from", fromAddr).
 				Str("to", toAddr).Int64("transfer", resp.len).Msg("relay success")
 		}
 	}

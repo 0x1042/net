@@ -86,5 +86,5 @@ func serveHTTP(stream *Stream) {
 		buf.WriteString(LF)
 		_, _ = remote.Write(buf.Bytes())
 	}
-	relay(stream, remote)
+	relay("http", stream, remote)
 }

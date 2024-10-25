@@ -48,11 +48,35 @@ add_link_options(-gsplit-dwarf)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
 
-find_package(Threads REQUIRED)
-find_package(asio CONFIG REQUIRED)
-find_package(spdlog CONFIG REQUIRED)
+include(CMakeDependentOption)
+include(CheckLanguage)
+include(GNUInstallDirs)
 
-find_package(mimalloc CONFIG REQUIRED)
+find_package(PkgConfig)
+# pkg_check_modules(PC_UUID QUIET uuid)
+
+find_package(Threads REQUIRED)
+
+option(CI "enable address sanitize" ON)
+if(CI)
+  include(FetchContent)
+
+  FetchContent_Declare(
+    spdlog
+    GIT_REPOSITORY https://github.com/gabime/spdlog.git
+    GIT_TAG v1.14.1)
+  FetchContent_MakeAvailable(spdlog)
+
+  set(ASIO_NO_DEPRECATED OFF)
+  FetchContent_Declare(
+    asiocmake
+    GIT_REPOSITORY "https://github.com/OlivierLDff/asio.cmake"
+    GIT_TAG "main")
+  FetchContent_MakeAvailable(asiocmake)
+else()
+  find_package(asio CONFIG REQUIRED)
+  find_package(spdlog CONFIG REQUIRED)
+endif()
 
 add_subdirectory(${PROJECT_SOURCE_DIR}/lib)
 
@@ -62,5 +86,5 @@ target_link_libraries(
   ${PROJECT_NAME}
   PRIVATE Threads::Threads
   PRIVATE spdlog::spdlog
-  PRIVATE proxy
-  PRIVATE mimalloc-static)
+  PRIVATE asio::asio
+  PRIVATE proxy)

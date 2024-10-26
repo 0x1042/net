@@ -1,10 +1,34 @@
 cmake_minimum_required(VERSION 3.26)
 project(server LANGUAGES C CXX ASM)
 
+include(CheckCXXCompilerFlag)
+include(CMakeDependentOption)
+include(CheckLanguage)
+include(GNUInstallDirs)
+
+message(STATUS "Compiler: ${CMAKE_CXX_COMPILER}")
+message(STATUS "Compiler ID: ${CMAKE_CXX_COMPILER_ID}")
+message(STATUS "Compiler Version: ${CMAKE_CXX_COMPILER_VERSION}")
+
+check_cxx_compiler_flag("-std=c++20" COMPILER_SUPPORTS_CXX20)
+if(COMPILER_SUPPORTS_CXX20)
+  message(STATUS "Compiler supports C++20")
+else()
+  message(WARNING "Compiler does not support C++20")
+endif()
+
 add_compile_options(-Wall -Wextra -pedantic -g)
 add_compile_options(-fsized-deallocation)
 add_compile_options(-Werror=delete-non-virtual-dtor)
-add_compile_options(-fexperimental-library)
+
+if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL
+                                             "AppleClang")
+  message(STATUS "Using Clang")
+  add_compile_options(-fexperimental-library)
+  message(STATUS "Enabling split-dwarf build")
+  add_compile_options(-gsplit-dwarf=single)
+  add_link_options(-gsplit-dwarf)
+endif()
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -12,7 +36,6 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_VERBOSE_MAKEFILE on)
 set(CMAKE_BUILD_TYPE RelWithDebInfo)
-# set(CMAKE_BUILD_TYPE MinSizeRel)
 
 option(ENABLE_SANITIZE "enable address sanitize" OFF)
 if(ENABLE_SANITIZE)
@@ -41,16 +64,8 @@ if(ENABLE_TIDY)
                            -header-filter=${CMAKE_CURRENT_SOURCE_DIR};)
 endif()
 
-message(STATUS "Enabling split-dwarf build")
-add_compile_options(-gsplit-dwarf=single)
-add_link_options(-gsplit-dwarf)
-
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
-
-include(CMakeDependentOption)
-include(CheckLanguage)
-include(GNUInstallDirs)
 
 find_package(PkgConfig)
 # pkg_check_modules(PC_UUID QUIET uuid)

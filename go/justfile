@@ -1,0 +1,21 @@
+LDFLAGS := "-s -w"
+TARGET := "target/server"
+TAGS := "urfave_cli_no_docs,netgo"
+
+build:
+	go build -trimpath -tags {{TAGS}} -ldflags "{{LDFLAGS}}" -o {{TARGET}}
+
+default: build
+
+vet:
+    go vet ./...
+
+fmt:
+    gofumpt -l -w .
+
+tidy:
+	go get -u -v ./...
+	go mod tidy
+
+lint:
+	golangci-lint run -v

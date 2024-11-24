@@ -65,10 +65,10 @@ func main() {
 		Usage: "socks5 && http proxy util",
 		Flags: []cli.Flag{
 			&cli.StringFlag{
-				Name:    "addr",
-				Value:   ":10085",
-				Aliases: []string{"a"},
-				Usage:   "listen address",
+				Name:     "addr",
+				Required: true,
+				Aliases:  []string{"a"},
+				Usage:    "listen address",
 			},
 
 			&cli.BoolFlag{

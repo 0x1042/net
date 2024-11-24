@@ -4,8 +4,8 @@ go 1.23
 
 require (
 	github.com/rs/zerolog v1.33.0
-	github.com/urfave/cli/v3 v3.0.0-alpha9.1
-	golang.org/x/sys v0.26.0
+	github.com/urfave/cli/v3 v3.0.0-alpha9.4
+	golang.org/x/sys v0.27.0
 )
 
 require (

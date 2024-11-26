@@ -72,7 +72,7 @@ find_package(PkgConfig)
 
 find_package(Threads REQUIRED)
 
-option(CI "enable address sanitize" OFF)
+option(CI "enable address sanitize" ON)
 if(CI)
   include(FetchContent)
 

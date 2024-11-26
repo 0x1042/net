@@ -1,0 +1,11 @@
+OUTPUT := "build"
+TARGET := "server"
+COMPDB := OUTPUT + "/compile_commands.json"
+
+build:
+    cmake -B {{ OUTPUT }} -G Ninja -S .
+    cmake --build {{ OUTPUT }}
+    ln -sf {{ COMPDB }} .
+
+clean:
+    cmake --build {{ OUTPUT }} --target clean

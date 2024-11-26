@@ -15,3 +15,5 @@ cpp/bazel-bin
 cpp/bazel-cpp
 cpp/bazel-out
 cpp/bazel-testlogs
+c/build
+c/cmake-build-debug-llvm

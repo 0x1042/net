@@ -6,17 +6,8 @@
 
 #include <sys/types.h>
 
+#include "relay.h"
 
+int new_server(option_t * option);
 
-typedef struct {
-	int port;
-	int backlog;
-	int bufsize;
-} option_t;
-
-int new_server(option_t *option);
-
-void start(option_t *option, int fd);
-
-void *handle(void *arg);
-
+void start(option_t * option, int fd);

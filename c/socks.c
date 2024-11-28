@@ -96,40 +96,6 @@ void *handle_socks(void *arg) {
 
   send(conn->local, SUCCESS, sizeof(SUCCESS), 0);
 
-  // Step 3: 数据转发（全双工）
-  fd_set fds;
-  int max_fd = (conn->local > conn->target) ? conn->local : conn->target;
-
-  char buffer[conn->bufsize];
-
-  while (1) {
-    FD_ZERO(&fds);
-    FD_SET(conn->local, &fds);
-    FD_SET(conn->target, &fds);
-
-    int activity = select(max_fd + 1, &fds, NULL, NULL, NULL); // NOLINT
-    if (activity < 0)
-      break;
-
-    if (FD_ISSET(conn->local, &fds)) {
-      ssize_t nlen = recv(conn->local, buffer, conn->bufsize, 0);
-      conn->write_size += nlen;
-      if (nlen <= 0) {
-        break;
-      }
-      send(conn->target, buffer, nlen, 0);
-    }
-
-    if (FD_ISSET(conn->target, &fds)) {
-      ssize_t nlen = recv(conn->target, buffer, conn->bufsize, 0);
-      conn->read_size += nlen;
-      if (nlen <= 0) {
-        break;
-      }
-      send(conn->local, buffer, nlen, 0);
-    }
-  }
-
-  close_connection(conn);
+  relay(conn);
   return NULL;
 }

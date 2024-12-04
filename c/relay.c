@@ -18,6 +18,7 @@ void show_usage(const char * name) {
     printf("  -p, --port          listen port\n");
     printf("  -b, --bufsize       buffer size\n");
     printf("  -l, --backlog       backlog size\n");
+    printf("  -v, --verbos        verbos log\n");
     printf("  -f, --fastopen      enable fastopen\n");
     printf("  -r, --reuseaddr     enable reuse address\n");
     printf("  -n, --nodelay       enable tcp nodelay\n");
@@ -50,15 +51,16 @@ void parse_command_line(int argc, char ** argv, option_t * opt) {
         ARGV_TO_INT(-p, --port, port) // NOLINT
         ARGV_TO_INT(-l, --backlog, port) // NOLINT
         ARGV_TO_INT(-b, --bufsize, port) // NOLINT
+        ARGV_TO_INT(-v, --verbos, verbos) // NOLINT
     }
 }
 
 void close_connection(connection_t * conn) {
     INFO(
-        "%s relay success [%d<->%d] . read:%d write %d",
+        "%s relay success [%s<->%s] . read:%d write %d",
         conn->tag,
-        conn->local,
-        conn->target,
+        conn->from_addr,
+        conn->to_addr,
         conn->read_size,
         conn->write_size);
     if (conn->local > 0) {
@@ -79,7 +81,7 @@ void sockaddr_str(const struct sockaddr_in * addr, char * output, size_t output_
 
 int connect_to_hostname(const char * hostname, const char * port) {
     struct addrinfo hints;
-    struct addrinfo * res = NULL;
+    struct addrinfo * res = nullptr;
     int sockfd = -1;
     memset(&hints, 0, sizeof(hints));
     hints.ai_family = AF_UNSPEC; // 支持 IPv4 或 IPv6

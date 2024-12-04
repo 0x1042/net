@@ -10,4 +10,4 @@
 
 int new_server(option_t * option);
 
-void start(option_t * option, int fd);
+int start(option_t * option, int fd);

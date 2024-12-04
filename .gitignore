@@ -10,6 +10,8 @@ go/go.sum
 zig/.zig-cache
 zig/pkg
 zig/target
+zig/zig-cache
+zig/zig-out
 cpp/MODULE.bazel.lock
 cpp/bazel-bin
 cpp/bazel-cpp

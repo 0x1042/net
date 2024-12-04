@@ -1,0 +1,7 @@
+
+
+debug:
+    zig build
+
+build:
+	zig build --release=safe -Doptimize=ReleaseSafe --prefix target

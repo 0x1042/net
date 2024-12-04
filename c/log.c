@@ -14,12 +14,21 @@
 #include <sys/types.h>
 
 #ifdef __APPLE__
-_Thread_local uint64_t tid = 0;
+_Thread_local uint64_t tid = 0; // NOLINT
 #else
-_Thread_local pthread_t tid = 0;
+_Thread_local pthread_t tid = 0; // NOLINT
 #endif
 
-void timef(const char * fmt, ...) {
+static level_t glevel = LEVEL_INFO; // NOLINT
+
+void set_level(level_t level) {
+    glevel = level;
+}
+
+void timef(level_t level, const char * fmt, ...) {
+    if (level < glevel) {
+        return;
+    }
     if (tid == 0) {
 #ifdef __APPLE__
         pthread_threadid_np(pthread_self(), &tid);
@@ -29,24 +38,26 @@ void timef(const char * fmt, ...) {
     }
 
     time_t rawtime = 0;
-    time(&rawtime);
+    time(&rawtime); //NOLINT
     struct tm tm;
-    localtime_r(&rawtime, &tm);
+    localtime_r(&rawtime, &tm); // NOLINT
 
     char time_buf[64];
-    strftime(time_buf, sizeof(time_buf), "[%Y-%m-%d %H:%M:%S]", &tm);
+    if (strftime(time_buf, sizeof(time_buf), "%Y-%m-%d %H:%M:%S", &tm) == 0) {
+        return;
+    }
 
     char buf[256];
 #ifdef __APPLE__
-    snprintf(buf, sizeof(buf), "%s [%llu] ", time_buf, tid);
+    snprintf(buf, sizeof(buf), "%s thd-%llu ", time_buf, tid);
 #else
-    snprintf(buf, sizeof(buf), "%s [%lu] ", time_buf, tid);
+    snprintf(buf, sizeof(buf), "%s thd-%lu ", time_buf, tid);
 #endif
 
-    fprintf(stderr, "%s", buf);
+    int _ = fprintf(stderr, "%s", buf);
 
     va_list args;
     va_start(args, fmt);
-    vfprintf(stderr, fmt, args);
+    _ = vfprintf(stderr, fmt, args);
     va_end(args);
 }

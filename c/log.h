@@ -11,27 +11,24 @@
 #define COLOR_WHITE "\x1B[37m"
 #define COLOR_RESET "\x1B[0m"
 
-void timef(const char *fmt, ...);
+typedef enum {
+    LEVEL_TRACE = -2,
+    LEVEL_DEBUG = -1,
+    LEVEL_INFO = 0,
+    LEVEL_WARN = 1,
+    LEVEL_ERROR = 2,
+} level_t;
 
-// #define TRACE(fmt, ...)                                                        \
-//   timef("%s[TRACE ] %10s:%10d:%20s(): " fmt "\n%s", COLOR_RESET, __FILE__,     \
-//         __LINE__, __func__, ##__VA_ARGS__, COLOR_RESET)
+void timef(level_t level, const char * fmt, ...);
 
-// #define INFO(fmt, ...)                                                         \
-//   timef("%s[INFO ] %10s:%10d:%20s(): " fmt "%s\n", COLOR_BLUE, __FILE__,       \
-//         __LINE__, __func__, ##__VA_ARGS__, COLOR_RESET)
+void set_level(level_t level);
 
-#define INFO(fmt, ...)                                                         \
-  timef("%s [INFO] " fmt "%s\n", COLOR_BLUE, ##__VA_ARGS__, COLOR_RESET)
+#define TRACE(fmt, ...) timef(LEVEL_TRACE, "%s [TRACE] " fmt "%s\n", COLOR_WHITE, ##__VA_ARGS__, COLOR_RESET)
 
-#define TRACE(fmt, ...)                                                        \
-  timef("%s [TRACE] " fmt "%s\n", COLOR_WHITE, ##__VA_ARGS__, COLOR_RESET)
+#define DEBUG(fmt, ...) timef(LEVEL_DEBUG, "%s [DEBUG] " fmt "%s\n", COLOR_CYAN, ##__VA_ARGS__, COLOR_RESET)
 
-#define ERROR(fmt, ...)                                                        \
-  timef("%s [ERROR] " fmt "%s\n", COLOR_RED, ##__VA_ARGS__, COLOR_RESET)
+#define INFO(fmt, ...) timef(LEVEL_INFO, "%s [INFO] " fmt "%s\n", COLOR_BLUE, ##__VA_ARGS__, COLOR_RESET)
 
-#define DEBUG(fmt, ...)                                                        \
-  timef("%s [DEBUG] " fmt "%s\n", COLOR_CYAN, ##__VA_ARGS__, COLOR_RESET)
+#define WARN(fmt, ...) timef(LEVEL_WARN, "%s [WARN] " fmt "%s\n", COLOR_YELLOW, ##__VA_ARGS__, COLOR_RESET)
 
-#define WARN(fmt, ...)                                                        \
-  timef("%s [WARN] " fmt "%s\n", COLOR_YELLOW, ##__VA_ARGS__, COLOR_RESET)
+#define ERROR(fmt, ...) timef(LEVEL_ERROR, "%s [ERROR] " fmt "%s\n", COLOR_RED, ##__VA_ARGS__, COLOR_RESET)

@@ -2,7 +2,7 @@ use std::net::{Ipv4Addr, Ipv6Addr, SocketAddr, SocketAddrV4, SocketAddrV6};
 use std::slice;
 use tokio::io::{AsyncRead, AsyncReadExt, AsyncWriteExt};
 use tokio::time::Instant;
-use tracing::{debug, info};
+use tracing::info;
 
 #[derive(Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub enum Addr {
@@ -96,42 +96,45 @@ pub async fn handle(mut incoming: tokio::net::TcpStream) -> anyhow::Result<()> {
         let mut methods = vec![0u8; nmet as usize];
         let _ = incoming.read_exact(&mut methods).await?;
 
-        for method in methods.iter() {
-            debug!("method is {:?}", *method);
+        let authreply = vec![0x05, 0x00];
+        let _ = incoming.write(&authreply).await?;
 
-            // if *method == 0x00 {
-            //     let mut buffer = vec![0x05, 0x00];
-            //     incoming.write(&mut buffer).await?;
-            // }
+        // for method in methods.iter() {
+        //     debug!("method is {:?}", *method);
 
-            if *method == 0x02 {
-                let buffer = vec![0x05, 0x02];
-                let _ = incoming.write(&buffer).await?;
-                let ver = incoming.read_u8().await?;
+        //     // if *method == 0x00 {
+        //     //     let mut buffer = vec![0x05, 0x00];
+        //     //     incoming.write(&mut buffer).await?;
+        //     // }
 
-                debug!("ver is {}", ver);
+        //     if *method == 0x02 {
+        //         let buffer = vec![0x05, 0x02];
+        //         let _ = incoming.write(&buffer).await?;
+        //         let ver = incoming.read_u8().await?;
 
-                // assert ver = 1
+        //         debug!("ver is {}", ver);
 
-                let ulen = incoming.read_u8().await?;
-                let mut namebuf = vec![0u8; ulen as usize];
-                let _ = incoming.read_exact(&mut namebuf).await?;
+        //         // assert ver = 1
 
-                let plen = incoming.read_u8().await?;
-                let mut pbuf = vec![0u8; plen as usize];
-                let _ = incoming.read_exact(&mut pbuf).await?;
+        //         let ulen = incoming.read_u8().await?;
+        //         let mut namebuf = vec![0u8; ulen as usize];
+        //         let _ = incoming.read_exact(&mut namebuf).await?;
 
-                // todo check
+        //         let plen = incoming.read_u8().await?;
+        //         let mut pbuf = vec![0u8; plen as usize];
+        //         let _ = incoming.read_exact(&mut pbuf).await?;
 
-                info!(
-                    "user is {} passwd is {}",
-                    String::from_utf8(namebuf).unwrap(),
-                    String::from_utf8(pbuf).unwrap()
-                );
-                let authreply = vec![0x01, 0x00];
-                let _ = incoming.write(&authreply).await?;
-            }
-        }
+        //         // todo check
+
+        //         info!(
+        //             "user is {} passwd is {}",
+        //             String::from_utf8(namebuf).unwrap(),
+        //             String::from_utf8(pbuf).unwrap()
+        //         );
+        //         let authreply = vec![0x01, 0x00];
+        //         let _ = incoming.write(&authreply).await?;
+        //     }
+        // }
     }
 
     // step2 read request

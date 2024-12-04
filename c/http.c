@@ -56,12 +56,12 @@ void debug_http_header(const http_header_t * request) {
         return;
     }
 
-    DEBUG("method:%s", request->method);
-    DEBUG("host:%s", request->host);
-    DEBUG("url:%s", request->url);
-    DEBUG("version:%s", request->version);
-    DEBUG("user_agent:%s", request->user_agent);
-    DEBUG("connection:%s", request->connection);
+    TRACE("method:%s", request->method);
+    TRACE("host:%s", request->host);
+    TRACE("url:%s", request->url);
+    TRACE("version:%s", request->version);
+    TRACE("user_agent:%s", request->user_agent);
+    TRACE("connection:%s", request->connection);
 }
 
 void parse_host_port(const char * input, host_port_t * result) {
@@ -96,6 +96,8 @@ void * handle_http(void * arg) {
     debug_http_header(&request);
 
     host_port_t hp;
+
+    strcpy(conn->to_addr, request.host);
 
     parse_host_port(request.host, &hp);
 

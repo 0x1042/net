@@ -11,12 +11,15 @@ typedef struct {
     ssize_t write_size;
     int bufsize;
     char tag[6];
+    char from_addr[256];
+    char to_addr[256];
 } connection_t;
 
 typedef struct {
     int port;
     int backlog;
     int bufsize;
+    int verbos;
 } option_t;
 
 typedef enum {

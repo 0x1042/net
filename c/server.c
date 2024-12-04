@@ -50,24 +50,20 @@ int new_server(option_t * option) {
     return fd;
 }
 
-void start(option_t * option, int fd) {
+int start(option_t * option, int fd) {
     struct sockaddr_in addr;
     socklen_t client_len = sizeof(addr);
 
     for (;;) {
         int incoming = accept(fd, (struct sockaddr *)&addr, &client_len);
-        char result[64]; // NOLINT
-        sockaddr_str(&addr, result, sizeof(result));
+
         if (incoming < 0) {
             ERROR("accept failed");
             break;
         }
 
         char flag = 0;
-
         ssize_t len = recv(incoming, &flag, 1, MSG_PEEK);
-
-        INFO("incoming request. fd:%d, from: %s type %d", incoming, result, flag);
 
         connection_t * conn = malloc(sizeof(connection_t));
         conn->local = incoming;
@@ -75,8 +71,11 @@ void start(option_t * option, int fd) {
         conn->write_size = 0;
         conn->write_size = 0;
         conn->bufsize = option->bufsize;
+        sockaddr_str(&addr, conn->from_addr, sizeof(conn->from_addr));
 
-        pthread_t worker = NULL;
+        INFO("incoming request. fd:%d, from: %s type %d", incoming, conn->from_addr, flag);
+
+        pthread_t worker = nullptr;
         if (flag == SOCKS_VER) {
             strncpy(conn->tag, "socks", sizeof(conn->tag) - 1);
             conn->tag[5] = '\0';
@@ -88,4 +87,6 @@ void start(option_t * option, int fd) {
         }
         pthread_detach(worker);
     }
+
+    return -1;
 }

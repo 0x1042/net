@@ -28,6 +28,10 @@
             .url = "https://github.com/sam701/zig-cli/archive/abf91b22869e076e1386b7b100876e0624853720.tar.gz",
             .hash = "1220567f95aa81d2e6b67923177ae36dd72006f279b8fc6a42bb981ecfa412d9ec67",
         },
+        .chameleon = .{
+            .url = "git+https://github.com/tr1ckydev/chameleon#9724f89ca2e56b33609090a6c6c6c1097844d1ee",
+            .hash = "12208314a762057bf5ed82b26b02cbfcf426066b9920bfdd1ddcb68d1d0c55c45ce3",
+        },
     },
 
     // Specifies the set of files and directories that are included in this package.

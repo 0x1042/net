@@ -1,6 +1,12 @@
 const std = @import("std");
 const cli = @import("zig-cli");
 const proxy = @import("proxy.zig");
+const logger = @import("logger.zig");
+
+pub const std_options = .{
+    .log_level = .debug,
+    .logFn = logger.logfn,
+};
 
 pub fn main() !void {
     var r = try cli.AppRunner.init(std.heap.page_allocator);

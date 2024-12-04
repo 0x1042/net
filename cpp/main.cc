@@ -13,7 +13,7 @@ auto main(int argc, char ** argv) -> int {
     Option option = Option(argc, argv);
     auto console = spdlog::stdout_color_mt("main");
     spdlog::set_default_logger(console);
-    spdlog::set_pattern("%^[%H:%M:%S %e] thd-%t %v %$");
+    spdlog::set_pattern("%^%Y-%m-%dT%H:%M:%S.%e [%l] thd-%t%$ %v");
 
     asio::io_context io_context;
 

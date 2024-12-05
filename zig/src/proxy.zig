@@ -9,12 +9,8 @@ pub var config = struct {
 
 pub fn run() !void {
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
+    defer std.debug.assert(gpa.deinit() == .ok);
     const allocator = gpa.allocator();
-
-    defer {
-        const deinit_status = gpa.deinit();
-        if (deinit_status == .leak) @panic("TEST FAIL");
-    }
 
     const address = try std.net.Address.parseIp(config.host, config.port);
 

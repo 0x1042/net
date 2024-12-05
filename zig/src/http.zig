@@ -1,6 +1,9 @@
 const std = @import("std");
 const relay = @import("relay.zig");
 
+const SUC: []const u8 = "HTTP/1.1 200 Connection Established\r\n\r\n";
+const HTTP_PORT: u16 = 80;
+
 pub const HttpSession = struct {
     arena: std.heap.ArenaAllocator,
     stream: std.net.Stream,
@@ -20,38 +23,40 @@ pub const HttpSession = struct {
 
         var stream = self.stream;
 
-        var reader = stream.reader();
-
         var list = std.ArrayList([]u8).init(self.arena.allocator());
         defer list.deinit();
 
+        var index: i32 = 0;
+
+        var domain: []const u8 = "";
+        var port: u16 = HTTP_PORT;
+
         while (true) {
             var buf: [128]u8 = undefined;
-            const rsp = try reader.readUntilDelimiter(&buf, '\n');
+            const rsp = try stream.reader().readUntilDelimiter(&buf, '\n');
             try list.append(rsp);
+
+            if (index == 1) {
+                const hostline = std.mem.trim(u8, rsp, "\r\n");
+                var it = std.mem.splitScalar(u8, hostline, ':');
+
+                var tmpidx: i32 = 0;
+                while (it.next()) |line| {
+                    if (tmpidx == 1) {
+                        const linebuf = std.mem.trim(u8, line, " ");
+                        const domain_buf = try self.arena.allocator().alloc(u8, linebuf.len);
+                        std.mem.copyForwards(u8, domain_buf, linebuf);
+                        domain = domain_buf;
+                    } else if (tmpidx == 2) {
+                        port = try std.fmt.parseInt(u16, line, 10);
+                    }
+                    tmpidx += 1;
+                }
+            }
+            index += 1;
             if (rsp.len <= 1) {
                 break;
             }
-        }
-
-        std.log.debug("lines size. {d} hostline {s}", .{ list.items.len, hostline });
-
-        var parts = std.mem.split(u8, hostline, ":");
-
-        var part_list = std.ArrayList([]const u8).init(self.arena.allocator());
-        defer part_list.deinit();
-
-        // 将拆分结果存入 ArrayList
-        while (parts.next()) |part| {
-            std.log.debug("part {s}", .{part});
-            try part_list.append(part);
-        }
-
-        const domain: []const u8 = part_list.items[2];
-        var port: u16 = 80;
-
-        if (part_list.items.len == 4) {
-            port = try std.fmt.parseInt(u16, part_list.items[3], 10);
         }
 
         std.log.debug("remote info {s}:{d}", .{ domain, port });
@@ -61,10 +66,7 @@ pub const HttpSession = struct {
 
         var remote = try std.net.tcpConnectToAddress(adds.addrs[0]);
 
-        const rsp = "HTTP/1.1 200 Connection Established\r\n\r\n";
-
-        try stream.writer().writeAll(rsp);
-
+        try stream.writer().writeAll(SUC);
         try relay.copy_bidirectional(&stream, &remote);
     }
 };

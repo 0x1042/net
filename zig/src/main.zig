@@ -9,30 +9,40 @@ pub const std_options = .{
 };
 
 pub fn main() !void {
-    var r = try cli.AppRunner.init(std.heap.page_allocator);
-    const app = cli.App{
-        .command = cli.Command{
-            .name = "server",
-            .options = &.{
-                // Define an Option for the "host" command-line argument.
-                .{
-                    .long_name = "host",
-                    .help = "host to listen on",
-                    .value_ref = r.mkRef(&proxy.config.host),
-                },
+    var runner = try cli.AppRunner.init(std.heap.page_allocator);
 
-                // Define an Option for the "port" command-line argument.
-                .{
-                    .long_name = "port",
-                    .help = "port to bind to",
-                    .required = true,
-                    .value_ref = r.mkRef(&proxy.config.port),
-                },
-            },
-            .target = cli.CommandTarget{
-                .action = cli.CommandAction{ .exec = proxy.run },
-            },
+    const action = cli.CommandAction{
+        .exec = proxy.run,
+    };
+
+    const host_opt = cli.Option{
+        .long_name = "host",
+        .short_alias = 'l',
+        .help = "host to listen on",
+        .value_ref = runner.mkRef(&proxy.config.host),
+    };
+
+    const port_opt = cli.Option{
+        .long_name = "port",
+        .short_alias = 'p',
+        .help = "port to bind to",
+        .value_ref = runner.mkRef(&proxy.config.port),
+    };
+
+    const cmd = cli.Command{
+        .name = "server",
+        .options = &.{
+            host_opt,
+            port_opt,
+        },
+        .target = cli.CommandTarget{
+            .action = action,
         },
     };
-    return r.run(&app);
+
+    const app = cli.App{
+        .command = cmd,
+        .version = "dev",
+    };
+    return runner.run(&app);
 }

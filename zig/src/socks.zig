@@ -11,11 +11,14 @@ const FAIL: u8 = 0x01;
 pub const SocksSession = struct {
     arena: std.heap.ArenaAllocator,
     stream: std.net.Stream,
+    local_addr: ?std.net.Address,
+    remote_addr: ?std.net.Address = null,
 
-    pub fn init(arena: std.heap.ArenaAllocator, stream: std.net.Stream) SocksSession {
+    pub fn init(arena: std.heap.ArenaAllocator, stream: std.net.Stream, addr: std.net.Address) SocksSession {
         return .{
             .stream = stream,
             .arena = arena,
+            .local_addr = addr,
         };
     }
 
@@ -24,6 +27,8 @@ pub const SocksSession = struct {
         defer {
             self.stream.close();
         }
+
+        const start = try std.time.Instant.now();
 
         var stream = self.stream;
 
@@ -47,20 +52,24 @@ pub const SocksSession = struct {
         _ = try stream.read(&port_buf);
 
         const port = std.mem.readInt(u16, &port_buf, .big);
+        self.remote_addr = std.net.Address.initIp4(addr_buf, port);
 
-        const remote_addr = std.net.Address.initIp4(addr_buf, port);
+        std.log.debug("remote {any}", .{self.remote_addr});
 
-        std.log.debug("remote {any}", .{remote_addr});
-
-        var remote = try std.net.tcpConnectToAddress(remote_addr);
+        var remote = try std.net.tcpConnectToAddress(self.remote_addr.?);
+        defer remote.close();
 
         const rpy: [10]u8 = .{ VER, SUC, SUC, V4, SUC, SUC, SUC, SUC, SUC, SUC };
 
         _ = try stream.write(&rpy);
 
         // 启动双向复制
-        try relay.copy_bidirectional(&stream, &remote);
-
-        remote.close();
+        try relay.copy_bidirectional(
+            &stream,
+            &remote,
+            self.local_addr,
+            self.remote_addr,
+            start,
+        );
     }
 };

@@ -25,8 +25,10 @@ if(ENABLE_SANITIZE)
   add_compile_options("-fno-optimize-sibling-calls")
   add_compile_options("-fsanitize=address")
   add_compile_options("-fsanitize-address-use-after-scope")
-  set(CMAKE_EXE_LINKER_FLAGS
-      "-fno-omit-frame-pointer -fno-optimize-sibling-calls -fsanitize=address")
+
+  add_link_options("-fno-omit-frame-pointer")
+  add_link_options("-fno-optimize-sibling-calls")
+  add_link_options("-fsanitize=address")
 endif()
 
 add_executable(

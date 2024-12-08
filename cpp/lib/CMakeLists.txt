@@ -10,7 +10,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ON)
 
-target_link_libraries(${LIB_NAME}
-	PRIVATE asio::asio
-	PRIVATE spdlog::spdlog
-)
+target_link_libraries(
+  ${LIB_NAME}
+  PRIVATE asio::asio
+  PRIVATE spdlog::spdlog)

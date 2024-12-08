@@ -81,7 +81,7 @@ void sockaddr_str(const struct sockaddr_in * addr, char * output, size_t output_
 
 int connect_to_hostname(const char * hostname, const char * port) {
     struct addrinfo hints;
-    struct addrinfo * res = nullptr;
+    struct addrinfo * res = NULL;
     int sockfd = -1;
     memset(&hints, 0, sizeof(hints));
     hints.ai_family = AF_UNSPEC; // 支持 IPv4 或 IPv6

@@ -27,8 +27,5 @@ async fn main() -> anyhow::Result<()> {
         .init();
 
     let opt = Opt::parse();
-
-    proxy::listen(&opt.addr).await?;
-
-    Ok(())
+    proxy::listen(&opt.addr).await
 }

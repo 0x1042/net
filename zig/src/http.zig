@@ -7,11 +7,14 @@ const HTTP_PORT: u16 = 80;
 pub const HttpSession = struct {
     arena: std.heap.ArenaAllocator,
     stream: std.net.Stream,
+    local_addr: ?std.net.Address,
+    remote_addr: ?std.net.Address = null,
 
-    pub fn init(arena: std.heap.ArenaAllocator, stream: std.net.Stream) HttpSession {
+    pub fn init(arena: std.heap.ArenaAllocator, stream: std.net.Stream, addr: std.net.Address) HttpSession {
         return .{
             .stream = stream,
             .arena = arena,
+            .local_addr = addr,
         };
     }
 
@@ -20,11 +23,9 @@ pub const HttpSession = struct {
         defer {
             self.stream.close();
         }
+        const start = try std.time.Instant.now();
 
         var stream = self.stream;
-
-        var list = std.ArrayList([]u8).init(self.arena.allocator());
-        defer list.deinit();
 
         var index: i32 = 0;
 
@@ -34,7 +35,6 @@ pub const HttpSession = struct {
         while (true) {
             var buf: [128]u8 = undefined;
             const rsp = try stream.reader().readUntilDelimiter(&buf, '\n');
-            try list.append(rsp);
 
             if (index == 1) {
                 const hostline = std.mem.trim(u8, rsp, "\r\n");
@@ -64,9 +64,18 @@ pub const HttpSession = struct {
         const adds = try std.net.getAddressList(self.arena.allocator(), domain, port);
         defer adds.deinit();
 
-        var remote = try std.net.tcpConnectToAddress(adds.addrs[0]);
+        self.remote_addr = adds.addrs[0];
+
+        var remote = try std.net.tcpConnectToAddress(self.remote_addr.?);
+        defer remote.close();
 
         try stream.writer().writeAll(SUC);
-        try relay.copy_bidirectional(&stream, &remote);
+        try relay.copy_bidirectional(
+            &stream,
+            &remote,
+            self.local_addr,
+            self.remote_addr,
+            start,
+        );
     }
 };

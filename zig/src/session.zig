@@ -22,7 +22,11 @@ pub const Session = struct {
     raddr: ?net.Address = null,
     start: time.Instant,
 
-    pub fn init(arena: std.heap.ArenaAllocator, connection: net.Server.Connection, start: time.Instant) Session {
+    pub fn init(
+        arena: std.heap.ArenaAllocator,
+        connection: net.Server.Connection,
+        start: time.Instant,
+    ) Session {
         return .{
             .arena = arena,
             .stream = connection.stream,

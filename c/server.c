@@ -75,7 +75,7 @@ int start(option_t * option, int fd) {
 
         INFO("incoming request. fd:%d, from: %s type %d", incoming, conn->from_addr, flag);
 
-        pthread_t worker = nullptr;
+        pthread_t worker = 0;
         if (flag == SOCKS_VER) {
             strncpy(conn->tag, "socks", sizeof(conn->tag) - 1);
             conn->tag[5] = '\0';

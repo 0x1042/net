@@ -1,7 +1,11 @@
-
-
 debug:
-    zig build
+    zig build -Doptimize=Debug --prefix target/debug
 
-build:
-	zig build --release=safe -Doptimize=ReleaseSafe --prefix target
+release:
+	zig build --release=safe -Doptimize=ReleaseSafe --prefix target/release
+
+run_debug: debug
+    ./target/debug/bin/sserver --port 10010
+
+run: release
+    ./target/release/bin/sserver --port 10010

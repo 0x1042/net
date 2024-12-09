@@ -1,7 +1,7 @@
 use tokio::io::BufReader;
 use tokio::io::{AsyncBufReadExt, AsyncWriteExt};
 use tokio::time::Instant;
-use tracing::info;
+use tracing::{debug, info};
 
 const CONNECT: &str = "CONNECT";
 const LF: &str = "\r\n";
@@ -23,6 +23,7 @@ pub async fn handle(incoming: tokio::net::TcpStream) -> anyhow::Result<()> {
     }
 
     let reqlines = lines.join("");
+    debug!("reqlines {:?}", &reqlines);
     let mut headers = [httparse::EMPTY_HEADER; 4];
     let mut req = httparse::Request::new(&mut headers);
     req.parse(reqlines.as_bytes())?;

@@ -9,3 +9,6 @@ build:
 
 clean:
     cmake --build {{ OUTPUT }} --target clean
+
+linux:
+    zig build-exe -x c -lc --name sserver -target x86_64-linux-gnu -Dcpu=x86_64_v3 -flto -fPIC -O ReleaseSafe http.h http.c log.h log.c relay.h relay.c server.h server.c socks.h socks.c main.c

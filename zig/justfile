@@ -1,11 +1,17 @@
+DATE := `date +"%Y-%m-%d"`
+VER := `git rev-parse --short HEAD`
+
 debug:
-    zig build -Doptimize=Debug --prefix target/debug
+    zig build -Dversion="{{ VER }}" -Ddate="{{ DATE }}" -Doptimize=Debug --prefix target/debug
 
 release:
-	zig build --release=safe -Doptimize=ReleaseSafe --prefix target/release
+	zig build -Dversion="{{ VER }}" -Ddate="{{ DATE }}" --release=safe -Doptimize=ReleaseSafe --prefix target/release
 
 run_debug: debug
     ./target/debug/bin/sserver --port 10010
 
 run: release
     ./target/release/bin/sserver --port 10010
+
+
+# env -u https_proxy -u http_proxy -u HTTP_PROXY -u HTTPS_PROXY zig build

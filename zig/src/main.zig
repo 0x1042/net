@@ -2,6 +2,7 @@ const std = @import("std");
 const cli = @import("zig-cli");
 const proxy = @import("proxy.zig");
 const logger = @import("logger.zig");
+const config = @import("config");
 
 pub const std_options = .{
     .log_level = .debug,
@@ -14,6 +15,8 @@ pub fn main() !void {
     const action = cli.CommandAction{
         .exec = proxy.run,
     };
+
+    const version = config.date ++ " " ++ config.version;
 
     const host_opt = cli.Option{
         .long_name = "host",
@@ -42,7 +45,7 @@ pub fn main() !void {
 
     const app = cli.App{
         .command = cmd,
-        .version = "dev",
+        .version = version,
     };
     return runner.run(&app);
 }

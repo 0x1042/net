@@ -1,6 +1,11 @@
 .cache
 .vscode
 .idea
+c/.idea
+cpp/.idea
+go/.idea
+rust/.idea
+zig/.idea
 cpp/target
 compile_commands.json
 rust/target

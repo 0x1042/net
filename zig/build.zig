@@ -18,19 +18,8 @@ pub fn build(b: *std.Build) void {
     const zigcli_dep = b.dependency("zig-cli", .{ .target = target });
     const zigcli_mod = zigcli_dep.module("zig-cli");
 
-    // const lib = b.addStaticLibrary(.{
-    //     .name = "zig",
-    //     // In this case the main source file is merely a path, however, in more
-    //     // complicated build scripts, this could be a generated file.
-    //     .root_source_file = b.path("src/root.zig"),
-    //     .target = target,
-    //     .optimize = optimize,
-    // });
-
-    // This declares intent for the library to be installed into the standard
-    // location when the user invokes the "install" step (the default step when
-    // running `zig build`).
-    // b.installArtifact(lib);
+    const cham_dep = b.dependency("chameleon", .{});
+    const cham_mod = cham_dep.module("chameleon");
 
     const exe = b.addExecutable(.{
         .name = "sserver",
@@ -40,9 +29,16 @@ pub fn build(b: *std.Build) void {
     });
 
     exe.root_module.addImport("zig-cli", zigcli_mod);
+    exe.root_module.addImport("chameleon", cham_mod);
 
-    const cham = b.dependency("chameleon", .{});
-    exe.root_module.addImport("chameleon", cham.module("chameleon"));
+    const version = b.option([]const u8, "version", "build version") orelse "dev";
+    const date = b.option([]const u8, "date", "build date") orelse "unknown";
+
+    const options = b.addOptions();
+    options.addOption([]const u8, "version", version);
+    options.addOption([]const u8, "date", date);
+
+    exe.root_module.addOptions("config", options);
 
     // This declares intent for the executable to be installed into the
     // standard location when the user invokes the "install" step (the default

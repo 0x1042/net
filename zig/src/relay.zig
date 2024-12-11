@@ -1,16 +1,20 @@
 const std = @import("std");
 const Thread = std.Thread;
 
-fn copy(from: *std.net.Stream, to: *std.net.Stream, total: *usize) !void {
+fn io_copy(reader: anytype, writer: anytype, total: *usize) !void {
     var buffer: [1024 * 32]u8 = undefined;
     while (true) {
-        const len = try from.read(buffer[0..]);
+        const len = try reader.read(buffer[0..]);
         if (len == 0) {
             break;
         }
-        _ = try to.writeAll(buffer[0..len]);
+        _ = try writer.writeAll(buffer[0..len]);
         total.* += len;
     }
+}
+
+fn copy(from: *std.net.Stream, to: *std.net.Stream, total: *usize) !void {
+    return io_copy(from.reader(), to.writer(), total);
 }
 
 pub fn copy_bidirectional(

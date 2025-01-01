@@ -4,12 +4,12 @@
 
 #pragma once
 
-#define COLOR_CYAN "\x1B[36m"
-#define COLOR_RED "\x1B[31m"
-#define COLOR_YELLOW "\x1B[33m"
-#define COLOR_BLUE "\x1B[34m"
-#define COLOR_WHITE "\x1B[37m"
-#define COLOR_RESET "\x1B[0m"
+static const char * const COLOR_WHITE = "\033[37m";
+static const char * const COLOR_CYAN = "\033[36m";
+static const char * const COLOR_BLUE = "\033[34m";
+static const char * const COLOR_YELLOW = "\033[33m";
+static const char * const COLOR_RED = "\033[31m";
+static const char * const COLOR_RESET = "\033[0m";
 
 typedef enum {
     LEVEL_TRACE = -2,
@@ -23,12 +23,11 @@ void timef(level_t level, const char * fmt, ...);
 
 void set_level(level_t level);
 
-#define TRACE(fmt, ...) timef(LEVEL_TRACE, "%s [TRACE] " fmt "%s\n", COLOR_WHITE, ##__VA_ARGS__, COLOR_RESET)
+#define LOG_FMT(level, color, type, fmt, ...) \
+    timef(level, "%s [" type "] " fmt "%s\n", color, ##__VA_ARGS__, COLOR_RESET)
 
-#define DEBUG(fmt, ...) timef(LEVEL_DEBUG, "%s [DEBUG] " fmt "%s\n", COLOR_CYAN, ##__VA_ARGS__, COLOR_RESET)
-
-#define INFO(fmt, ...) timef(LEVEL_INFO, "%s [INFO] " fmt "%s\n", COLOR_BLUE, ##__VA_ARGS__, COLOR_RESET)
-
-#define WARN(fmt, ...) timef(LEVEL_WARN, "%s [WARN] " fmt "%s\n", COLOR_YELLOW, ##__VA_ARGS__, COLOR_RESET)
-
-#define ERROR(fmt, ...) timef(LEVEL_ERROR, "%s [ERROR] " fmt "%s\n", COLOR_RED, ##__VA_ARGS__, COLOR_RESET)
+#define TRACE(...) LOG_FMT(LEVEL_TRACE, COLOR_WHITE, "TRACE", __VA_ARGS__)
+#define DEBUG(...) LOG_FMT(LEVEL_DEBUG, COLOR_CYAN, "DEBUG", __VA_ARGS__)
+#define INFO(...) LOG_FMT(LEVEL_INFO, COLOR_BLUE, "INFO", __VA_ARGS__)
+#define WARN(...) LOG_FMT(LEVEL_WARN, COLOR_YELLOW, "WARN", __VA_ARGS__)
+#define ERROR(...) LOG_FMT(LEVEL_ERROR, COLOR_RED, "ERROR", __VA_ARGS__)

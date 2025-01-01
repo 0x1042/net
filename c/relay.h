@@ -1,6 +1,5 @@
 #pragma once
 
-#include <arpa/inet.h>
 #include <netinet/in.h>
 #include <sys/types.h>
 
@@ -15,7 +14,10 @@ typedef struct {
     char to_addr[256];
 } connection_t;
 
+void init_conn(connection_t * conn, const int local);
+
 typedef struct {
+    int fd;
     int port;
     int backlog;
     int bufsize;

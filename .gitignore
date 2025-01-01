@@ -17,6 +17,7 @@ zig/pkg
 zig/target
 zig/zig-cache
 zig/zig-out
+__pycache__
 cpp/MODULE.bazel.lock
 cpp/bazel-bin
 cpp/bazel-cpp

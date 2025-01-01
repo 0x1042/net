@@ -9,6 +9,19 @@ build:
 
 clean:
     cmake --build {{ OUTPUT }} --target clean
+    rm -fr build*
+    rm -fr cmake-build*
 
 linux:
-    zig build-exe -x c -lc --name sserver -target x86_64-linux-gnu -Dcpu=x86_64_v3 -flto -fPIC -O ReleaseSafe http.h http.c log.h log.c relay.h relay.c server.h server.c socks.h socks.c main.c
+    zig build-exe -x c -lc --name sserver -target x86_64-linux-gnu -Dcpu=x86_64_v2 -flto -fPIC -O ReleaseSafe http.h http.c log.h log.c relay.h relay.c server.h server.c socks.h socks.c main.c
+
+lto_build:
+    meson setup builddir -Db_lto=true -Db_pie=true -Db_staticpic=true
+    meson compile -C builddir
+
+asan_build:
+    meson setup builddebug -Db_sanitize=address -Db_lundef=false
+    meson compile -C builddebug
+
+asan_run:
+    ASAN_OPTIONS=verbosity=1:detect_leaks=1:symbolize=1 ./builddebug/sserver -p 10080

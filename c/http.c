@@ -3,7 +3,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
 
 #include <sys/socket.h>
 #include <sys/types.h>
@@ -11,17 +10,16 @@
 #include "log.h"
 #include "relay.h"
 
-static const char CONNECT[] = "CONNECT";
-static const char CONNECT_RESP[] = "HTTP/1.1 200 Connection Established\r\n\r\n";
-static const char PROXY[] = "Proxy-Connection: Keep-Alive\r\n";
+static constexpr char CONNECT[] = "CONNECT";
+static constexpr char CONNECT_RESP[] = "HTTP/1.1 200 Connection Established\r\n\r\n";
 
 void parse_http_header(const char * header, http_header_t * request) {
     memset(request, 0, sizeof(http_header_t));
 
     const char * line_start = header;
-    const char * line_end = NULL;
+    const char * line_end = nullptr;
 
-    while ((line_end = strchr(line_start, '\n')) != NULL) {
+    while ((line_end = strchr(line_start, '\n')) != nullptr) {
         size_t line_length = line_end - line_start;
 
         if (line_length > 0 && line_start[line_length - 1] == '\r') {
@@ -86,10 +84,14 @@ void parse_host_port(const char * input, host_port_t * result) {
 }
 
 void * handle_http(void * arg) {
-    connection_t * conn = (connection_t *)arg;
+    auto conn = (connection_t *)arg;
 
     char header[LINE_BUF];
     ssize_t len = recv(conn->local, &header, sizeof(header), 0);
+
+    if (len <= 0) {
+        return NULL;
+    }
 
     http_header_t request;
     parse_http_header(header, &request);

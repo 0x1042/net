@@ -12,8 +12,20 @@
 
 #include "log.h"
 
+void init_conn(connection_t * conn, const int local) {
+    conn->local = local;
+    conn->target = -1;
+    conn->read_size = 0;
+    conn->write_size = 0;
+
+    memset(conn->from_addr, 0, sizeof(conn->from_addr));
+    memset(conn->to_addr, 0, sizeof(conn->to_addr));
+    memset(conn->tag, 0, sizeof(conn->tag));
+}
+
 void show_usage(const char * name) {
     printf("Usage: %s <option> [value]\n", name);
+    printf("\n");
     printf("Options:\n");
     printf("  -p, --port          listen port\n");
     printf("  -b, --bufsize       buffer size\n");
@@ -63,25 +75,28 @@ void close_connection(connection_t * conn) {
         conn->to_addr,
         conn->read_size,
         conn->write_size);
+
     if (conn->local > 0) {
         close(conn->local);
     }
+
     if (conn->target > 0) {
         close(conn->target);
     }
+
     free(conn);
 }
 
 void sockaddr_str(const struct sockaddr_in * addr, char * output, size_t output_size) {
     char buf[INET_ADDRSTRLEN];
     inet_ntop(AF_INET, &(addr->sin_addr), buf, sizeof(buf));
-    int port = ntohs(addr->sin_port);
+    const int port = ntohs(addr->sin_port);
     snprintf(output, output_size, "%s:%d", buf, port); // NOLINT
 }
 
 int connect_to_hostname(const char * hostname, const char * port) {
     struct addrinfo hints;
-    struct addrinfo * res = NULL;
+    struct addrinfo * res = nullptr;
     int sockfd = -1;
     memset(&hints, 0, sizeof(hints));
     hints.ai_family = AF_UNSPEC; // 支持 IPv4 或 IPv6
@@ -91,6 +106,7 @@ int connect_to_hostname(const char * hostname, const char * port) {
         fprintf(stderr, "getaddrinfo error: %s\n", gai_strerror(status)); // NOLINT
         return -1;
     }
+
     for (struct addrinfo * p = res; p != NULL; p = p->ai_next) {
         // 创建套接字
         sockfd = socket(p->ai_family, p->ai_socktype, p->ai_protocol);
@@ -118,8 +134,7 @@ int connect_to_hostname(const char * hostname, const char * port) {
 
 void relay(connection_t * conn) {
     fd_set fds;
-    int max_fd = (conn->local > conn->target) ? conn->local : conn->target;
-
+    const int max_fd = (conn->local > conn->target) ? conn->local : conn->target;
     char buffer[conn->bufsize];
 
     while (1) {
@@ -133,7 +148,7 @@ void relay(connection_t * conn) {
         }
 
         if (FD_ISSET(conn->local, &fds)) {
-            ssize_t nlen = recv(conn->local, buffer, conn->bufsize, 0);
+            const ssize_t nlen = recv(conn->local, buffer, conn->bufsize, 0);
             conn->write_size += nlen;
             if (nlen <= 0) {
                 break;
@@ -142,7 +157,7 @@ void relay(connection_t * conn) {
         }
 
         if (FD_ISSET(conn->target, &fds)) {
-            ssize_t nlen = recv(conn->target, buffer, conn->bufsize, 0);
+            const ssize_t nlen = recv(conn->target, buffer, conn->bufsize, 0);
             conn->read_size += nlen;
             if (nlen <= 0) {
                 break;

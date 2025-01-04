@@ -8,6 +8,7 @@ on:
 
 env:
   BUILD_TYPE: RelWithDebInfo
+  OPT: ReleaseSafe
 
 jobs:
   build:
@@ -24,3 +25,8 @@ jobs:
 
       - name: Build
         run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
+
+      - uses: mlugg/setup-zig@v1
+
+      - name: Build by zig
+        run: zig build --verbose --summary all --release=safe -Doptimize=${{env.OPT}} --prefix target

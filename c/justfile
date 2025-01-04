@@ -12,8 +12,18 @@ clean:
     rm -fr build*
     rm -fr cmake-build*
 
-linux:
-    zig build-exe -x c -lc --name sserver -target x86_64-linux-gnu -Dcpu=x86_64_v2 -flto -fPIC -O ReleaseSafe http.h http.c log.h log.c relay.h relay.c server.h server.c socks.h socks.c main.c
+
+zb_debug:
+    zig build -Doptimize=Debug --prefix {{ OUTPUT }}/debug
+
+zb_rel:
+    zig build --release=safe -Doptimize=ReleaseSafe --prefix {{ OUTPUT }}/rel
+
+zb_linux:
+    zig build -Dtarget=x86_64-linux-gnu -Doptimize=Debug --prefix {{ OUTPUT }}/linux/debug
+
+zb_linux_rel:
+    zig build -Dtarget=x86_64-linux-gnu -Doptimize=ReleaseSafe --prefix {{ OUTPUT }}/linux/rel
 
 lto_build:
     meson setup builddir -Db_lto=true -Db_pie=true -Db_staticpic=true

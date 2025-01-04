@@ -1,6 +1,7 @@
 .cache
 .vscode
 .idea
+.zig-cache
 c/.idea
 cpp/.idea
 go/.idea
@@ -14,6 +15,7 @@ go/target
 go/go.sum
 zig/.zig-cache
 zig/pkg
+c/target
 zig/target
 zig/zig-cache
 zig/zig-out

@@ -10,8 +10,8 @@
 #include "log.h"
 #include "relay.h"
 
-static constexpr char CONNECT[] = "CONNECT";
-static constexpr char CONNECT_RESP[] = "HTTP/1.1 200 Connection Established\r\n\r\n";
+CONST char CONNECT[] = "CONNECT";
+CONST char CONNECT_RESP[] = "HTTP/1.1 200 Connection Established\r\n\r\n";
 
 void parse_http_header(const char * header, http_header_t * request) {
     memset(request, 0, sizeof(http_header_t));
@@ -104,13 +104,13 @@ void * handle_http(void * arg) {
     parse_host_port(request.host, &hp);
 
     char port[6]; // NOLINT
-    int st = snprintf(port, sizeof(port), "%d", hp.port);
+    snprintf(port, sizeof(port), "%d", hp.port); // NOLINT
 
     int remote = connect_to_hostname(hp.host, port);
     conn->target = remote;
 
     if (strcmp(CONNECT, request.method) == 0) {
-        ssize_t slen = send(conn->local, CONNECT_RESP, strlen(CONNECT_RESP), 0);
+        send(conn->local, CONNECT_RESP, strlen(CONNECT_RESP), 0); // NOLINT
     } else {
         send(conn->target, header, strlen(header), 0);
     }

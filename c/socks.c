@@ -12,11 +12,11 @@
 #include "log.h"
 #include "relay.h"
 
-constexpr static char CMD_CONNECT = 0x01;
-constexpr static char NO_AUTH[2] = {0x05, 0x00};
-constexpr static char FAILURE_CMD[2] = {0x05, 0x07};
-constexpr static char FAILURE_ATYP[2] = {0x05, 0x08};
-constexpr static char SUCCESS[10] = {0x05, 0x00, 0x00, 0x01, 0, 0, 0, 0, 0, 0};
+CONST char CMD_CONNECT = 0x01;
+CONST char NO_AUTH[2] = {0x05, 0x00};
+CONST char FAILURE_CMD[2] = {0x05, 0x07};
+CONST char FAILURE_ATYP[2] = {0x05, 0x08};
+CONST char SUCCESS[10] = {0x05, 0x00, 0x00, 0x01, 0, 0, 0, 0, 0, 0};
 
 void * handle_socks(void * arg) {
     auto conn = (connection_t *)arg;

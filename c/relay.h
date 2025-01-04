@@ -3,6 +3,12 @@
 #include <netinet/in.h>
 #include <sys/types.h>
 
+#if __clang_major__ >= 19
+#    define CONST constexpr static
+#else
+#    define CONST const static
+#endif
+
 typedef struct {
     int local;
     int target;

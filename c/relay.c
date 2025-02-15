@@ -23,50 +23,6 @@ void init_conn(connection_t * conn, const int local) {
     memset(conn->tag, 0, sizeof(conn->tag));
 }
 
-void show_usage(const char * name) {
-    printf("Usage: %s <option> [value]\n", name);
-    printf("\n");
-    printf("Options:\n");
-    printf("  -p, --port          listen port\n");
-    printf("  -b, --bufsize       buffer size\n");
-    printf("  -l, --backlog       backlog size\n");
-    printf("  -v, --verbos        verbos log\n");
-    printf("  -f, --fastopen      enable fastopen\n");
-    printf("  -r, --reuseaddr     enable reuse address\n");
-    printf("  -n, --nodelay       enable tcp nodelay\n");
-    printf("  -w, --worker        worker number\n");
-    printf("  -h, --help          print help\n");
-}
-
-#define STR_CMP(s, l) (strcmp(arg, #s) == 0 || strcmp(arg, #l) == 0)
-
-#define ARGV_TO_INT(s, l, d) \
-    if (STR_CMP(s, l) && i + 1 < argc) { \
-        opt->d = atoi(argv[i + 1]); \
-    }
-
-void parse_command_line(int argc, char ** argv, option_t * opt) {
-    if (argc < 2) {
-        show_usage(argv[0]);
-        exit(0); // NOLINT
-    }
-
-    opt->backlog = BACKLOG;
-    opt->bufsize = BUFSIZE;
-
-    for (int i = 1; i < argc; i++) {
-        const char * arg = argv[i];
-        if (STR_CMP(-h, --help)) {
-            show_usage(argv[0]);
-            exit(0); // NOLINT
-        }
-        ARGV_TO_INT(-p, --port, port) // NOLINT
-        ARGV_TO_INT(-l, --backlog, port) // NOLINT
-        ARGV_TO_INT(-b, --bufsize, port) // NOLINT
-        ARGV_TO_INT(-v, --verbos, verbos) // NOLINT
-    }
-}
-
 void close_connection(connection_t * conn) {
     INFO(
         "%s relay success [%s<->%s] . read:%d write %d",
@@ -96,14 +52,14 @@ void sockaddr_str(const struct sockaddr_in * addr, char * output, size_t output_
 
 int connect_to_hostname(const char * hostname, const char * port) {
     struct addrinfo hints;
-    struct addrinfo * res = nullptr;
+    struct addrinfo * res = NULL;
     int sockfd = -1;
     memset(&hints, 0, sizeof(hints));
     hints.ai_family = AF_UNSPEC; // 支持 IPv4 或 IPv6
     hints.ai_socktype = SOCK_STREAM; // TCP 连接
     int status = getaddrinfo(hostname, port, &hints, &res);
     if (status != 0) {
-        fprintf(stderr, "getaddrinfo error: %s\n", gai_strerror(status)); // NOLINT
+        ERROR("getaddrinfo error: %d\n", status);
         return -1;
     }
 

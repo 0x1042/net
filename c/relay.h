@@ -1,12 +1,15 @@
 #pragma once
 
+#include <netdb.h>
+
 #include <netinet/in.h>
+#include <sys/select.h>
 #include <sys/types.h>
 
 #if __clang_major__ >= 19
 #    define CONST constexpr static
 #else
-#    define CONST const static
+#    define CONST static const
 #endif
 
 typedef struct {
@@ -37,10 +40,6 @@ typedef enum {
     LINE_BUF = 1024,
     HTTP_PORT = 80,
 } constval_t;
-
-void show_usage(const char * name);
-
-void parse_command_line(int argc, char ** argv, option_t * opt);
 
 void close_connection(connection_t * conn);
 

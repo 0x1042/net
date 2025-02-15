@@ -5,6 +5,7 @@ typedef struct {
     char url[256];
     char version[16];
     char host[256];
+    char port[16];
     char user_agent[256];
     char connection[64];
 } http_header_t;

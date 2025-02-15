@@ -19,6 +19,7 @@ c/target
 zig/target
 zig/zig-cache
 zig/zig-out
+c/zig-out
 __pycache__
 cpp/MODULE.bazel.lock
 cpp/bazel-bin

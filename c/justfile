@@ -1,37 +1,11 @@
 OUTPUT := "build"
-TARGET := "server"
-COMPDB := OUTPUT + "/compile_commands.json"
 
-build:
-    cmake -B {{ OUTPUT }} -G Ninja -S .
-    cmake --build {{ OUTPUT }}
-    ln -sf {{ COMPDB }} .
+dbg:
+    meson setup {{OUTPUT}}/dbg --reconfigure -Dbuildtype=debug -Db_sanitize=address -Db_lundef=false
+    meson compile -C {{OUTPUT}}/dbg    
+    ln -sf {{OUTPUT}}/dbg/compile_commands.json .
 
-clean:
-    cmake --build {{ OUTPUT }} --target clean
-    rm -fr build*
-    rm -fr cmake-build*
+release:
+    meson setup {{OUTPUT}}/rel -Dbuildtype=release -Db_lto=true
+    meson compile -C {{OUTPUT}}/rel
 
-
-zb_debug:
-    zig build -Doptimize=Debug --prefix {{ OUTPUT }}/debug
-
-zb_rel:
-    zig build --release=safe -Doptimize=ReleaseSafe --prefix {{ OUTPUT }}/rel
-
-zb_linux:
-    zig build -Dtarget=x86_64-linux-gnu -Doptimize=Debug --prefix {{ OUTPUT }}/linux/debug
-
-zb_linux_rel:
-    zig build -Dtarget=x86_64-linux-gnu -Doptimize=ReleaseSafe --prefix {{ OUTPUT }}/linux/rel
-
-lto_build:
-    meson setup builddir -Db_lto=true -Db_pie=true -Db_staticpic=true
-    meson compile -C builddir
-
-asan_build:
-    meson setup builddebug -Db_sanitize=address -Db_lundef=false
-    meson compile -C builddebug
-
-asan_run:
-    ASAN_OPTIONS=verbosity=1:detect_leaks=1:symbolize=1 ./builddebug/sserver -p 10080

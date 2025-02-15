@@ -4,6 +4,11 @@
 
 #pragma once
 
+#include <stdarg.h>
+#include <stdio.h>
+#include <string.h>
+#include <time.h>
+
 static const char * const COLOR_WHITE = "\033[37m";
 static const char * const COLOR_CYAN = "\033[36m";
 static const char * const COLOR_BLUE = "\033[34m";

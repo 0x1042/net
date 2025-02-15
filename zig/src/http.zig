@@ -19,9 +19,9 @@ pub const HttpSession = struct {
     }
 
     pub fn run(self: *HttpSession) !void {
-        defer self.arena.deinit();
         defer {
             self.stream.close();
+            self.arena.deinit();
         }
         const start = try std.time.Instant.now();
 

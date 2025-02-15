@@ -1,5 +1,10 @@
 use clap::Parser;
 
+use mimalloc::MiMalloc;
+
+#[global_allocator]
+static GLOBAL: MiMalloc = MiMalloc;
+
 #[derive(Parser)] // requires `derive` feature
 struct Opt {
     /// server listen address

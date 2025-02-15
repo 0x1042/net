@@ -6,7 +6,8 @@ version = "0.1.0"
 [dependencies]
 anyhow.workspace = true
 clap = { workspace = true, features = ["derive"] }
+mimalloc = { workspace = true }
 proxy = { path = "../proxy", version = "*" }
 tokio = { workspace = true, features = ["full"] }
-tracing-subscriber = { workspace = true, features = ["env-filter"] }
 tracing.workspace = true
+tracing-subscriber = { workspace = true, features = ["env-filter"] }

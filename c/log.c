@@ -4,6 +4,7 @@
 
 #include "log.h"
 
+#include <assert.h>
 #include <pthread.h>
 #include <stdarg.h>
 #include <stdio.h>
@@ -50,13 +51,13 @@ void timef(level_t level, const char * fmt, ...) {
 #ifdef __APPLE__
     snprintf(buf, sizeof(buf), "%s thd-%llu ", time_buf, tid);
 #else
-    snprintf(buf, sizeof(buf), "%s thd-%lu ", time_buf, tid);
+    snprintf(buf, sizeof(buf), "%s thd-%p ", time_buf, (void *)tid);
 #endif
 
-    int _ = fprintf(stderr, "%s", buf);
+    fprintf(stderr, "%s", buf);
 
     va_list args;
     va_start(args, fmt);
-    _ = vfprintf(stderr, fmt, args);
+    vfprintf(stderr, fmt, args);
     va_end(args);
 }

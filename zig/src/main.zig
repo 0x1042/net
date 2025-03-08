@@ -4,8 +4,13 @@ const proxy = @import("proxy.zig");
 const logger = @import("logger.zig");
 const config = @import("config");
 
-pub const std_options = .{
-    .log_level = .debug,
+pub const level = switch (@import("builtin").mode) {
+    .Debug => std.log.Level.debug,
+    else => std.log.Level.info,
+};
+
+pub const std_options: std.Options = .{
+    .log_level = level,
     .logFn = logger.logfn,
 };
 

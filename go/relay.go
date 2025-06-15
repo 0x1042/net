@@ -76,7 +76,12 @@ func relay(tag string, from, to net.Conn) {
 		toAddr := resp.to.String()
 
 		if resp.err != nil && errors.Is(resp.err, io.EOF) {
-			log.Error().Err(resp.err).Str("tag", tag).Str("from", fromAddr).Str("to", toAddr).Msg("relay error")
+			log.Error().
+				Err(resp.err).
+				Str("tag", tag).
+				Str("from", fromAddr).
+				Str("to", toAddr).
+				Msg("relay error")
 		} else {
 			log.Info().Str("tag", tag).Str("from", fromAddr).
 				Str("to", toAddr).Int64("transfer", resp.len).Msg("relay success")

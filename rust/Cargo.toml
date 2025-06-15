@@ -5,15 +5,15 @@ members = ["proxy", "sserver"]
 resolver = "2"
 
 [workspace.package]
-edition = "2021"
+edition = "2024"
 
 [workspace.dependencies]
-anyhow = "1.0.95"
-clap = { version = "4.5.29", features = ["derive"] }
-httparse = "1.10.0"
-mimalloc = "0.1"
-mio = { version = "1.0.3", features = ["log", "net"] }
-tokio = { version = "1.43.0", features = ["full"] }
+anyhow = "1.0.98"
+clap = { version = "4.5.40", features = ["derive"] }
+httparse = "1.10.1"
+mimalloc = "0.1.46"
+mio = { version = "1.0.4", features = ["log", "net"] }
+tokio = { version = "1.45.1", features = ["full"] }
 tracing = "0.1.41"
 tracing-subscriber = { version = "0.3.19", features = ["env-filter"] }
 

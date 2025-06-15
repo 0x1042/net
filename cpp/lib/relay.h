@@ -8,7 +8,7 @@
 #include <asio/awaitable.hpp>
 #include <asio/co_spawn.hpp>
 #include <asio/detached.hpp>
-#include <asio/experimental/as_tuple.hpp>
+#include <asio/as_tuple.hpp>
 #include <asio/experimental/awaitable_operators.hpp>
 #include <asio/use_awaitable.hpp>
 #include <asio/write.hpp>
@@ -28,7 +28,6 @@ struct Option {
 };
 
 using TcpStream = asio::ip::tcp::socket;
-using EndPoint = asio::ip::tcp::endpoint;
 
 auto relay(TcpStream & from, TcpStream & to, const std::string & tag = "console") -> asio::awaitable<void>;
 

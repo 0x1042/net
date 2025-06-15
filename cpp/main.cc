@@ -21,7 +21,7 @@ auto main(int argc, char ** argv) -> int {
     asio::co_spawn(io_context, listener(io_context, option), asio::detached);
 
     std::vector<std::jthread> workers;
-    uint32_t worker = option.worker == 0 ? std::thread::hardware_concurrency() : option.worker;
+    const uint32_t worker = option.worker == 0 ? std::thread::hardware_concurrency() : option.worker;
 
     workers.resize(worker);
     for (size_t i = 0; i < worker; ++i) {

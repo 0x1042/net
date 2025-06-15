@@ -3,9 +3,9 @@ module sserver
 go 1.24
 
 require (
-	github.com/rs/zerolog v1.33.0
-	github.com/urfave/cli/v3 v3.0.0-beta1
-	golang.org/x/sys v0.31.0
+	github.com/rs/zerolog v1.34.0
+	github.com/urfave/cli/v3 v3.3.8
+	golang.org/x/sys v0.33.0
 )
 
 require (

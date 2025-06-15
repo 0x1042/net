@@ -8,12 +8,13 @@
 #include <sstream>
 #include <vector>
 
+#include <asio/as_tuple.hpp>
 #include <netinet/tcp.h>
-#include <spdlog/spdlog.h>
 #include <sys/socket.h>
 #include <sys/types.h>
 
 #include "http.h"
+#include "logger.h"
 #include "socks.h"
 
 using namespace asio::experimental::awaitable_operators;
@@ -68,25 +69,31 @@ void Option::showUsage(const std::string & name) {
 
 auto relay(TcpStream & from, TcpStream & to, const std::string & tag) -> asio::awaitable<void> {
     std::string logger = tag;
-    auto relay = [logger = std::move(logger)](TcpStream & from, TcpStream & to) -> asio::awaitable<void> {
+    auto relay
+        = [logger = std::move(logger)](TcpStream & from, TcpStream & to) -> asio::awaitable<void> {
         const auto & from_addr = from.remote_endpoint();
         const auto & to_addr = to.remote_endpoint();
         size_t cnt = 0;
         try {
             std::array<std::byte, bufsize> data{};
             for (;;) {
-                std::size_t len = co_await from.async_read_some(asio::buffer(data), asio::use_awaitable);
-                co_await asio::async_write(to, asio::buffer(data, len), asio::use_awaitable);
-                cnt += len;
+                auto [ec, rlen] = co_await from.async_read_some(
+                    asio::buffer(data), asio::as_tuple(asio::use_awaitable));
+                if (ec) {
+                    break;
+                }
+
+                co_await asio::async_write(
+                    to, asio::buffer(data, rlen), asio::as_tuple(asio::use_awaitable));
+                cnt += rlen;
             }
         } catch (...) {
             from.close();
             to.close();
         }
 
-        spdlog::info(
-            "[{}] {}:{} -> {}:{} transfer {} bytes success. ",
-            logger,
+        INFO(
+            "{}:{} -> {}:{} transfer {} bytes success. ",
             from_addr.address().to_string(),
             from_addr.port(),
             to_addr.address().to_string(),
@@ -98,8 +105,8 @@ auto relay(TcpStream & from, TcpStream & to, const std::string & tag) -> asio::a
 }
 
 auto listener(asio::io_context & io_context, const Option & option) -> asio::awaitable<void> {
-    auto endpoint = EndPoint(asio::ip::tcp::v4(), option.port);
-    spdlog::info("server listen at {}:{}", endpoint.address().to_string(), endpoint.port());
+    auto endpoint = asio::ip::tcp::endpoint(asio::ip::tcp::v4(), option.port);
+    INFO("server listen at {}:{}", endpoint.address().to_string(), endpoint.port());
 
     asio::ip::tcp::acceptor ln(io_context, endpoint);
 
@@ -109,28 +116,37 @@ auto listener(asio::io_context & io_context, const Option & option) -> asio::awa
     }
 
     for (;;) {
-        TcpStream socket = co_await ln.async_accept(asio::use_awaitable);
+        auto && [ec, incoming] = co_await ln.async_accept(asio::as_tuple(asio::use_awaitable));
+
+        if (ec) {
+            break;
+        }
+
         int enable = 1;
         if (option.fastopen) {
-            ::setsockopt(socket.native_handle(), IPPROTO_TCP, TCP_FASTOPEN, &enable, sizeof(enable));
+            ::setsockopt(
+                incoming.native_handle(), IPPROTO_TCP, TCP_FASTOPEN, &enable, sizeof(enable));
         }
 
         if (option.nodelay) {
-            ::setsockopt(socket.native_handle(), IPPROTO_TCP, TCP_NODELAY, &enable, sizeof(enable));
+            ::setsockopt(
+                incoming.native_handle(), IPPROTO_TCP, TCP_NODELAY, &enable, sizeof(enable));
         }
 
         if (option.reuseaddr) {
-            ::setsockopt(socket.native_handle(), SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(enable));
-            ::setsockopt(socket.native_handle(), SOL_SOCKET, SO_REUSEPORT, &enable, sizeof(enable));
+            ::setsockopt(
+                incoming.native_handle(), SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(enable));
+            ::setsockopt(
+                incoming.native_handle(), SOL_SOCKET, SO_REUSEPORT, &enable, sizeof(enable));
         }
 
         std::array<std::byte, 1> data{};
-        socket.receive(asio::buffer(data), asio::socket_base::message_peek);
+        incoming.receive(asio::buffer(data), asio::socket_base::message_peek);
 
         if (std::to_integer<uint8_t>(data.at(0)) == ver) {
-            asio::co_spawn(io_context, socks::handle(std::move(socket)), asio::detached);
+            asio::co_spawn(io_context, socks::handle(std::move(incoming)), asio::detached);
         } else {
-            asio::co_spawn(io_context, http::handle(std::move(socket)), asio::detached);
+            asio::co_spawn(io_context, http::handle(std::move(incoming)), asio::detached);
         }
     }
 }

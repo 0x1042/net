@@ -24,7 +24,11 @@ func Control(option Option) func(network, address string, c syscall.RawConn) err
 			}
 		})
 		if err != nil {
-			log.Error().Str("network", network).Str("address", address).Err(err).Msg("set control error")
+			log.Error().
+				Str("network", network).
+				Str("address", address).
+				Err(err).
+				Msg("set control error")
 		} else {
 			log.Info().Str("network", network).Str("address", address).Msg("set control success")
 		}

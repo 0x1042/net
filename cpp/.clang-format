@@ -16,7 +16,7 @@ BraceWrapping:
   IndentBraces: false
 BreakConstructorInitializersBeforeComma: false
 Cpp11BracedListStyle: true
-ColumnLimit: 120
+ColumnLimit: 100
 ConstructorInitializerAllOnOneLineOrOnePerLine: true
 ExperimentalAutoDetectBinPacking: true
 UseTab: Never
@@ -50,7 +50,7 @@ IncludeCategories:
   - Regex: ".*"
     Priority: 40
 ReflowComments: false
-AlignEscapedNewlines: DontAlign
+AlignEscapedNewlines: LeftWithLastLine
 AlignTrailingComments: false
 
 # Not changed:

@@ -40,7 +40,10 @@ func listen(option Option) error {
 		stream := newStream(conn)
 
 		peek, _ := stream.Peek(1)
-		log.Trace().Uint8("type", peek[0]).Str("from", conn.LocalAddr().String()).Msg("incomeing request")
+		log.Trace().
+			Uint8("type", peek[0]).
+			Str("from", conn.LocalAddr().String()).
+			Msg("incomeing request")
 		if peek[0] == 0x05 {
 			go serveSocks(stream)
 		} else {

@@ -2,7 +2,7 @@ build:
 	cargo build --release
 
 debug:
-	cargo build
+	cargo +nightly build --no-default-features -Zno-embed-metadata
 
 clean:
 	cargo clean

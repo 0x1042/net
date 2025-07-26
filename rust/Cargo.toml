@@ -13,11 +13,12 @@ clap = { version = "4.5.40", features = ["derive"] }
 httparse = "1.10.1"
 mimalloc = "0.1.46"
 mio = { version = "1.0.4", features = ["log", "net"] }
-tokio = { version = "1.45.1", features = ["full"] }
+tokio = { version = "1.46.1", features = ["full"] }
 tracing = "0.1.41"
 tracing-subscriber = { version = "0.3.19", features = ["env-filter"] }
 
 [profile.release]
+hint-mostly-unused = true
 codegen-units = 1
 debug = false
 debug-assertions = false

@@ -1,0 +1,96 @@
+name: bazel build go
+
+on:
+  push:
+    tags:
+      - "v*"
+
+env:
+  BASE_BINARY_PATH: bazel-bin/go/go_
+
+jobs:
+  build-and-rename:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false # 即使一个 job 失败，也继续其他的
+      matrix:
+        # 定义平台矩阵，包含所有需要的信息
+        target:
+          - {
+              os: "linux",
+              arch: "amd64",
+              platform_label: "@rules_go//go/toolchain:linux_amd64",
+              ext: "",
+            }
+          - {
+              os: "linux",
+              arch: "arm64",
+              platform_label: "@rules_go//go/toolchain:linux_arm64",
+              ext: "",
+            }
+          - {
+              os: "darwin",
+              arch: "amd64",
+              platform_label: "@rules_go//go/toolchain:darwin_amd64",
+              ext: "",
+            }
+          - {
+              os: "darwin",
+              arch: "arm64",
+              platform_label: "@rules_go//go/toolchain:darwin_arm64",
+              ext: "",
+            }
+          - {
+              os: "windows",
+              arch: "amd64",
+              platform_label: "@rules_go//go/toolchain:windows_amd64",
+              ext: ".exe",
+            }
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - uses: bazel-contrib/setup-bazel@0.15.0
+        with:
+          bazelisk-cache: true
+          disk-cache: ${{ github.workflow }}
+          repository-cache: true
+
+      - name: Build for ${{ matrix.target.os }}-${{ matrix.target.arch }}
+        run: |
+          bazel build //go:go --platforms=${{ matrix.target.platform_label }}
+
+      - name: Rename and Prepare Artifact
+        id: prepare_artifact # 给这个步骤一个 id，方便后续引用
+        run: |
+          # 1. 定义期望的最终文件名
+          APP_NAME="srv5" # 你的应用名
+          # RELEASE_TAG=${GITHUB_REF_NAME:-"dev"} # 从 git tag 获取版本号
+          ARTIFACT_NAME="${APP_NAME}-${{ matrix.target.os }}-${{ matrix.target.arch }}${{ matrix.target.ext }}"
+
+          # 2. 查找 Bazel 生成的原始二进制文件
+          SOURCE_BINARY_PATH="${BASE_BINARY_PATH}/go${{ matrix.target.ext }}"
+          echo "SOURCE_BINARY_PATH: ${SOURCE_BINARY_PATH}"
+
+          # 3. 检查文件是否存在并重命名
+          if [ ! -f "$SOURCE_BINARY_PATH" ]; then
+            echo "Error: Binary not found at $SOURCE_BINARY_PATH"
+            exit 1
+          fi
+
+          echo "Renaming '$SOURCE_BINARY_PATH' to '$ARTIFACT_NAME'"
+          mv "$SOURCE_BINARY_PATH" "$ARTIFACT_NAME"
+
+          # 4. 将产物名称输出，供后续步骤使用
+          echo "artifact_path=${ARTIFACT_NAME}" >> $GITHUB_OUTPUT
+
+      - name: Upload Artifact to GitHub Release
+        # 推荐使用这个 action 来上传到 release
+        uses: softprops/action-gh-release@v2
+        if: github.ref_type == 'tag'
+        with:
+          # 使用上一步输出的产物路径
+          files: ${{ steps.prepare_artifact.outputs.artifact_path }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

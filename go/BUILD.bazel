@@ -1,0 +1,43 @@
+load("@rules_go//go:def.bzl", "go_binary", "go_library")
+
+go_library(
+    name = "go_lib",
+    srcs = [
+        "control.go",
+        "control_darwin.go",
+        "control_linux.go",
+        "http.go",
+        "main.go",
+        "relay.go",
+        "socks.go",
+    ],
+    importpath = "sserver/go",
+    visibility = ["//visibility:private"],
+    deps = [
+        "@com_github_rs_zerolog//:zerolog",
+        "@com_github_rs_zerolog//log",
+        "@com_github_urfave_cli_v3//:cli",
+    ] + select({
+        "@rules_go//go/platform:darwin": [
+            "@org_golang_x_sys//unix",
+        ],
+        "@rules_go//go/platform:ios": [
+            "@org_golang_x_sys//unix",
+        ],
+        "@rules_go//go/platform:linux": [
+            "@org_golang_x_sys//unix",
+        ],
+        "//conditions:default": [],
+    }),
+)
+
+go_binary(
+    name = "go",
+    cgo = False,
+    embed = [":go_lib"],
+    gc_linkopts = [
+        "-w",
+        "-s",
+    ],
+    visibility = ["//visibility:public"],
+)

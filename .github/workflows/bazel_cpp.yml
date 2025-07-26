@@ -1,0 +1,30 @@
+name: bazel build go
+
+on:
+  push:
+    tags:
+      - "v*"
+  pull_request:
+    branches: ["master"]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - uses: bazel-contrib/setup-bazel@0.15.0
+        with:
+          bazelisk-cache: true
+          disk-cache: ${{ github.workflow }}
+          repository-cache: true
+
+      - name: build cpp
+        run: |
+          bazel build --config=cpp --config=opt //cpp:srv
+
+      - name: build c
+        run: |
+          bazel build --config=cpp --config=opt //c:srvc

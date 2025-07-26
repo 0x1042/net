@@ -1,0 +1,21 @@
+load("@rules_cc//cc:defs.bzl", "cc_binary")
+
+# alias(
+#     name = "compile_commands",
+#     actual = "@wolfd_bazel_compile_commands//:generate_compile_commands",
+# )
+
+cc_binary(
+    name = "srv",
+    srcs = ["main.cc"],
+    copts = [
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+    ],
+    deps = [
+        "//cpp/lib:proxy",
+        "@asio",
+        "@spdlog",
+    ],
+)

@@ -26,5 +26,12 @@ jobs:
       - name: setup
         run: meson setup target -Dbuildtype=release -Db_lto=true
 
-      - name: build
+      - name: build by meson
         run: meson compile -C target
+
+      # - uses: mlugg/setup-zig@v2
+      # with:
+      # version: 0.14.1
+
+      # - name: build by zig
+      # run: zig build --verbose --summary all --release=safe -Doptimize=ReleaseFast --prefix target

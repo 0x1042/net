@@ -1,0 +1,18 @@
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
+cc_library(
+    name = "proxy",
+    srcs = glob(["*.cc"]),
+    hdrs = glob(["*.h"]),
+    copts = [
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+    ],
+    # strip_include_prefix = "cpp",
+    visibility = ["//cpp:__pkg__"],
+    deps = [
+        "@asio",
+        "@spdlog",
+    ],
+)

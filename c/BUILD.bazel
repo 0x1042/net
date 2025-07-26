@@ -1,0 +1,45 @@
+load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
+
+cc_library(
+    name = "kernel",
+    srcs = [
+        "http.c",
+        "log.c",
+        "relay.c",
+        "server.c",
+        "socks.c",
+    ],
+    hdrs = [
+        "http.h",
+        "log.h",
+        "relay.h",
+        "server.h",
+        "socks.h",
+    ],
+    copts = [
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "-std=c2x",
+        "-D_POSIX_C_SOURCE=200809L",
+    ],
+    visibility = ["//cpp:__pkg__"],
+)
+
+cc_binary(
+    name = "srvc",
+    srcs = ["main.c"],
+    copts = [
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "-std=c2x",
+        "-D_POSIX_C_SOURCE=200809L",
+    ],
+    linkopts = [
+        "-lpthread",
+    ],
+    deps = [
+        ":kernel",
+    ],
+)
